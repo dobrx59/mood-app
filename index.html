@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mood App</title>
+    <link rel="apple-touch-icon" href="https://emojiapi.dev/api/v1/smiling_face/512.png">
+    
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; background-color: #fcfcfc; overflow: hidden; }
+        .cache { display: none !important; }
+        .fondue { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        #ecran-choix { display: flex; flex-direction: column; height: 100vh; }
+        .bouton { flex: 1; border: none; cursor: pointer; font-size: 100px; display: flex; align-items: center; justify-content: center; transition: transform 0.1s; -webkit-tap-highlight-color: transparent; }
+        .bouton:active { transform: scale(0.95); }
+        .bouton.vert { background-color: #A8E6CF; }
+        .bouton.rouge { background-color: #FF8B94; }
+
+        #ecran-raisons { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .liste-raisons { display: flex; flex-direction: column; width: 85%; max-width: 320px; gap: 10px; max-height: 50vh; overflow-y: auto; padding: 5px; }
+
+        .item-cause { display: flex; gap: 8px; width: 100%; }
+        .btn-raison { flex: 1; padding: 18px; border: none; border-radius: 16px; background: white; font-size: 18px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 6px rgba(0,0,0,0.05); text-align: left; padding-left: 20px; }
+        .btn-suppr { padding: 0 15px; border: none; background: white; color: #ff8b94; border-radius: 16px; cursor: pointer; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+
+        .zone-ajout { display: flex; width: 85%; max-width: 320px; gap: 10px; margin-top: 20px; }
+        #input-nouvelle-cause { flex: 1; padding: 15px; border: 2px solid #eee; border-radius: 12px; outline: none; }
+        #btn-ajouter-cause { padding: 0 20px; border: none; background: #eee; border-radius: 12px; font-size: 20px; cursor: pointer; }
+
+        #ecran-confirmation { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; padding: 20px; }
+        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; max-width: 280px; margin: 15px auto; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); }
+        .pixel { width: 32px; height: 32px; background-color: #eee; border-radius: 8px; font-size: 10px; color: #bbb; display: flex; align-items: center; justify-content: center; font-weight: bold; cursor: pointer; }
+        .pixel.vert { background-color: #A8E6CF !important; color: #4b8a72; }
+        .pixel.rouge { background-color: #FF8B94 !important; color: #a34a50; }
+
+        .stats-container { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 280px; margin-top: 15px; }
+        .stat-card { background: white; padding: 15px; border-radius: 18px; box-shadow: 0 4px 10px rgba(0,0,0,0.04); text-align: left; }
+        .stat-label { display: block; font-size: 10px; color: #999; text-transform: uppercase; margin-bottom: 4px; }
+        .stat-valeur { display: block; font-size: 16px; font-weight: 800; color: #333; }
+
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 100; }
+        .modal-content { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 300px; text-align: center; position: relative; }
+        .modal-close { position: absolute; top: 15px; right: 20px; font-size: 28px; color: #ccc; cursor: pointer; }
+        .bouton-secondaire { border: none; padding: 12px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; cursor: pointer; background: white; box-shadow: 0 4px 8px rgba(0,0,0,0.05); }
+        .btn-reset { margin-top: 30px; font-size: 11px; color: #ccc; cursor: pointer; text-decoration: underline; padding: 10px; }
+        .titre-calendrier { margin: 15px 0 0 0; color: #aaa; font-size: 12px; text-transform: uppercase; }
+    </style>
+</head>
+<body>
+
+<div id="app">
+  <div id="ecran-choix" class="ecran-accueil fondue">
+    <button class="bouton vert" id="btn-vert">😊</button>
+    <button class="bouton rouge" id="btn-rouge">😕</button>
+  </div>
+
+  <div id="ecran-raisons" class="ecran-accueil cache fondue">
+    <h1 id="titre-raison">Pourquoi ?</h1>
+    <div id="container-raisons" class="liste-raisons"></div>
+    <div class="zone-ajout">
+      <input type="text" id="input-nouvelle-cause" placeholder="Ajouter..." maxlength="25">
+      <button id="btn-ajouter-cause">+</button>
+    </div>
+  </div>
+
+  <div id="ecran-confirmation" class="ecran-accueil cache fondue">
+    <div class="message-merci">
+      <h1>C'est noté !</h1>
+      <div class="actions-finales">
+        <button id="btn-voir-grille" class="bouton-secondaire">Calendrier</button>
+        <button id="btn-voir-stats" class="bouton-secondaire">Analyses 📊</button>
+      </div>
+      <h2 id="nom-du-mois" class="titre-calendrier cache">Chargement...</h2>
+      <div id="grille-pixels" class="grille cache"></div>
+      
+      <div id="section-stats" class="stats-container cache">
+        <div class="stat-card">
+          <span class="stat-label">Humeur moyenne</span>
+          <span id="score-bonheur" class="stat-valeur">--</span>
+        </div>
+        <div class="stat-card">
+          <span class="stat-label">Source principale</span>
+          <span id="cause-majeure" class="stat-valeur">--</span>
+        </div>
+      </div>
+      
+      <p id="btn-reset" class="btn-reset">Réinitialiser tout le mois</p>
+    </div>
+  </div>
+
+  <div id="modal-detail" class="modal cache">
+    <div class="modal-content fondue">
+      <span id="modal-close" class="modal-close">&times;</span>
+      <div id="modal-emoji" style="font-size: 50px; margin-bottom: 10px;">😊</div>
+      <h2 id="modal-date" style="margin: 0; font-size: 16px; color: #888; text-transform: capitalize;">Date</h2>
+      <p id="modal-raison" style="font-size: 24px; font-weight: bold; margin: 15px 0; color: #333;">Raison</p>
+      <button id="btn-action-modal" class="bouton-secondaire" style="width: 100%; box-shadow: none;">Bouton</button>
+    </div>
+  </div>
+</div>
+
+<script type="module">
+  import confetti from "https://cdn.skypack.dev/canvas-confetti";
+
+  let humeurTemporaire = "";
+  const dateActuelle = new Date();
+  const idMois = `${dateActuelle.getFullYear()}-${dateActuelle.getMonth()}`;
+  const nomMoisLong = dateActuelle.toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' });
+
+  const causesParDefaut = ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs", "💰 Argent"];
+  let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || causesParDefaut;
+
+  function obtenirHistorique() {
+    const h = localStorage.getItem(`histo-${idMois}`);
+    return h ? JSON.parse(h) : {};
+  }
+
+  function afficherCauses() {
+    const container = document.getElementById('container-raisons');
+    container.innerHTML = "";
+    mesCauses.forEach((cause, index) => {
+      const div = document.createElement('div');
+      div.className = "item-cause";
+      div.innerHTML = `<button class="btn-raison">${cause}</button><button class="btn-suppr">×</button>`;
+      div.querySelector('.btn-raison').onclick = () => enregistrerRaison(cause);
+      div.querySelector('.btn-suppr').onclick = () => {
+        mesCauses.splice(index, 1);
+        localStorage.setItem('mesCauses', JSON.stringify(mesCauses));
+        afficherCauses();
+      };
+      container.appendChild(div);
+    });
+  }
+
+  function gererChoixHumeur(humeur) {
+    humeurTemporaire = humeur;
+    confetti({ particleCount: 30, spread: 50, origin: { y: 0.6 }, colors: humeur === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
+    setTimeout(() => {
+      document.getElementById('ecran-choix').classList.add('cache');
+      afficherCauses();
+      document.getElementById('ecran-raisons').classList.remove('cache');
+      document.getElementById('titre-raison').innerText = (humeur === 'content') ? "Super ! Pourquoi ?" : "Mince... Pourquoi ?";
+    }, 250);
+  }
+
+  function enregistrerRaison(raison) {
+    const jour = dateActuelle.getDate();
+    const historique = obtenirHistorique();
+    historique[jour] = { humeur: humeurTemporaire, raison: raison };
+    localStorage.setItem(`histo-${idMois}`, JSON.stringify(historique));
+    document.getElementById('ecran-raisons').classList.add('cache');
+    setTimeout(() => {
+      afficherEcranFinal(humeurTemporaire);
+      confetti({ particleCount: 60, spread: 70, origin: { y: 0.7 }, colors: humeurTemporaire === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
+    }, 200);
+  }
+
+  function afficherEcranFinal(humeurActive) {
+    document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
+    document.getElementById('ecran-confirmation').classList.remove('cache');
+    document.getElementById('nom-du-mois').innerText = nomMoisLong;
+    const btn = document.getElementById('btn-voir-grille');
+    btn.style.backgroundColor = (humeurActive === 'content') ? '#A8E6CF' : '#FF8B94';
+    dessinerGrille();
+    calculerStats();
+  }
+
+  function dessinerGrille() {
+    const grille = document.getElementById('grille-pixels');
+    grille.innerHTML = '';
+    const historique = obtenirHistorique();
+    const nbJours = new Date(dateActuelle.getFullYear(), dateActuelle.getMonth() + 1, 0).getDate();
+    for (let i = 1; i <= nbJours; i++) {
+      const pixel = document.createElement('div');
+      pixel.className = 'pixel';
+      pixel.innerText = i;
+      if (historique[i]) {
+        pixel.classList.add(historique[i].humeur === 'content' ? 'vert' : 'rouge');
+        pixel.onclick = () => {
+          const modal = document.getElementById('modal-detail');
+          document.getElementById('modal-emoji').innerText = historique[i].humeur === 'content' ? '😊' : '😕';
+          document.getElementById('modal-date').innerText = `Le ${i} ${nomMoisLong}`;
+          document.getElementById('modal-raison').innerText = historique[i].raison;
+          const btnM = document.getElementById('btn-action-modal');
+          if (i === dateActuelle.getDate()) {
+            btnM.innerText = "Modifier mon humeur";
+            btnM.onclick = () => { modal.classList.add('cache'); document.getElementById('ecran-confirmation').classList.add('cache'); document.getElementById('ecran-choix').classList.remove('cache'); };
+          } else {
+            btnM.innerText = "Fermer"; btnM.onclick = () => modal.classList.add('cache');
+          }
+          modal.classList.remove('cache');
+        };
+      }
+      grille.appendChild(pixel);
+    }
+  }
+
+  function calculerStats() {
+    const historique = obtenirHistorique();
+    const jours = Object.values(historique);
+    if (jours.length === 0) return;
+    document.getElementById('score-bonheur').innerText = Math.round((jours.filter(j => j.humeur === 'content').length / jours.length) * 100) + "% positif";
+    const compteurs = {};
+    jours.forEach(j => compteurs[j.raison] = (compteurs[j.raison] || 0) + 1);
+    const top = Object.keys(compteurs).reduce((a, b) => compteurs[a] > compteurs[b] ? a : b);
+    document.getElementById('cause-majeure').innerText = top + " (" + compteurs[top] + " fois)";
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const histo = obtenirHistorique();
+    const jour = dateActuelle.getDate();
+    if (histo[jour]) afficherEcranFinal(histo[jour].humeur);
+
+    document.getElementById('btn-vert').onclick = () => gererChoixHumeur('content');
+    document.getElementById('btn-rouge').onclick = () => gererChoixHumeur('pas-content');
+    document.getElementById('btn-ajouter-cause').onclick = () => {
+      const input = document.getElementById('input-nouvelle-cause');
+      if (input.value.trim()) { mesCauses.push(input.value.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); input.value = ""; afficherCauses(); }
+    };
+    document.getElementById('btn-voir-grille').onclick = () => {
+      document.getElementById('grille-pixels').classList.toggle('cache');
+      document.getElementById('nom-du-mois').classList.toggle('cache');
+      document.getElementById('section-stats').classList.add('cache');
+    };
+    document.getElementById('btn-voir-stats').onclick = () => {
+      document.getElementById('section-stats').classList.toggle('cache');
+      document.getElementById('grille-pixels').classList.add('cache');
+      document.getElementById('nom-du-mois').classList.add('cache');
+    };
+    document.getElementById('modal-close').onclick = () => document.getElementById('modal-detail').classList.add('cache');
+    document.getElementById('btn-reset').onclick = () => {
+      localStorage.removeItem(`histo-${idMois}`);
+      location.reload(); 
+    };
+  });
+</script>
+</body>
+</html>
