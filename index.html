@@ -5,32 +5,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Mood Tracker</title>
     <style>
-        /* CSS COMPLET */
-        body, html { 
-            margin: 0; padding: 0; height: 100%; 
-            font-family: -apple-system, system-ui, sans-serif; 
-            background-color: #f2f2f7; 
-            overflow: hidden; 
-        }
-
+        /* CSS INTÉGRÉ DIRECTEMENT */
+        body, html { margin: 0; padding: 0; height: 100%; font-family: -apple-system, sans-serif; background-color: #f2f2f7; overflow: hidden; }
         .cache { display: none !important; }
-
         .fondue { animation: fadeIn 0.6s ease-out; }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SPLASH SCREEN */
-        #splash-screen { 
-            position: fixed; inset: 0; background-color: #ffffff; 
-            display: flex; align-items: center; justify-content: center; 
-            z-index: 5000; opacity: 1; transition: opacity 1s ease-out;
-        }
+        #splash-screen { position: fixed; inset: 0; background-color: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 1; transition: opacity 1s ease-out; }
         .carte-accueil { font-size: 24px; font-weight: 600; color: #1c1c1e; text-align: center; }
         .hidden-splash { opacity: 0 !important; pointer-events: none; }
 
-        /* STRUCTURE */
         .ecran-accueil { display: flex; flex-direction: column; height: 100vh; width: 100%; position: relative; align-items: center; justify-content: center; }
         .bouton-principal { flex: 1; width: 100%; border: none; font-size: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; -webkit-tap-highlight-color: transparent; }
         .bouton-principal.vert { background-color: #A8E6CF; }
@@ -63,7 +47,6 @@
         .fleche-retour { position: absolute; top: 50px; left: 20px; font-size: 30px; color: #8e8e93; cursor: pointer; z-index: 10; }
         .btn-reset { margin-top: 30px; font-size: 12px; color: #ccaeae; text-decoration: underline; cursor: pointer; }
 
-        /* MODALES */
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 6000; }
         .modal-content { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 400px; text-align: center; }
     </style>
@@ -76,8 +59,8 @@
     </div>
 
     <div id="ecran-choix" class="ecran-accueil">
-        <button class="bouton-principal vert" id="btn-vert">😊</button>
-        <button class="bouton-principal rouge" id="btn-rouge">😕</button>
+        <button class="bouton-principal vert" id="btn-vert" onclick="choisirHumeur('content')">😊</button>
+        <button class="bouton-principal rouge" id="btn-rouge" onclick="choisirHumeur('pas-content')">😕</button>
     </div>
 
     <div id="ecran-raisons" class="ecran-accueil cache fondue">
@@ -131,7 +114,6 @@
 </div>
 
 <script type="module">
-    // JS COMPLET
     import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
     let humeurDuJour = "";
@@ -140,7 +122,7 @@
     const idMois = `${date.getFullYear()}-${date.getMonth()}`;
     let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
 
-    // SPLASH SCREEN
+    // GESTION DU SPLASH SCREEN
     setTimeout(() => {
         const splash = document.getElementById('splash-screen');
         if(splash) {
@@ -161,18 +143,15 @@
         document.getElementById(idBouton).classList.add(classeHumeur);
     }
 
-    // 1. CHOIX HUMEUR
     window.choisirHumeur = function(h) {
         humeurDuJour = h;
         const couleurConfetti = (h === 'content') ? ['#A8E6CF'] : ['#FF8B94'];
         confetti({ particleCount: 40, colors: couleurConfetti });
-
         naviguer('ecran-raisons');
         document.getElementById('titre-raison').innerText = h === 'content' ? "Super ! Pourquoi ?" : "Mince... Pourquoi ?";
         chargerCauses();
     }
 
-    // 2. CAUSES
     function chargerCauses() {
         const cont = document.getElementById('container-raisons');
         cont.innerHTML = "";
@@ -180,13 +159,11 @@
             const div = document.createElement('div');
             div.className = "item-cause";
             div.innerHTML = `<button class="btn-raison">${r}</button><button class="btn-suppr">×</button>`;
-            
             div.querySelector('.btn-raison').onclick = () => {
                 causeChoisie = r;
                 document.getElementById('modal-note').classList.remove('cache');
                 document.getElementById('input-note').focus();
             };
-            
             div.querySelector('.btn-suppr').onclick = () => {
                 mesCauses.splice(index, 1);
                 localStorage.setItem('mesCauses', JSON.stringify(mesCauses));
@@ -196,20 +173,15 @@
         });
     }
 
-    // 3. VALIDATION FINALE
     document.getElementById('btn-valider-note').onclick = () => {
         const noteDetail = document.getElementById('input-note').value; 
         const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        
         histo[date.getDate()] = { humeur: humeurDuJour, raison: causeChoisie, note: noteDetail };
         localStorage.setItem(`histo-${idMois}`, JSON.stringify(histo));
-        
         document.getElementById('modal-note').classList.add('cache');
         document.getElementById('input-note').value = "";
-
         const couleurConfetti = (humeurDuJour === 'content') ? ['#A8E6CF'] : ['#FF8B94'];
         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: couleurConfetti });
-        
         afficherFinal();
     };
 
@@ -226,7 +198,6 @@
         grille.innerHTML = "";
         const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
         const nbJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        
         for(let i=1; i<=nbJours; i++) {
             const p = document.createElement('div');
             p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
@@ -256,9 +227,7 @@
         document.getElementById('cause-majeure').innerText = top;
     }
 
-    // BOUTONS
-    document.getElementById('btn-vert').onclick = () => choisirHumeur('content');
-    document.getElementById('btn-rouge').onclick = () => choisirHumeur('pas-content');
+    // EVENTS
     document.getElementById('retour-choix').onclick = () => naviguer('ecran-choix');
     document.getElementById('retour-raisons').onclick = () => naviguer('ecran-raisons');
     document.getElementById('modal-close-btn').onclick = () => document.getElementById('modal-detail').classList.add('cache');
@@ -288,17 +257,16 @@
     };
 
     document.getElementById('btn-reset').onclick = () => {
-        if(confirm("Effacer tout le mois ?")) {
-            localStorage.removeItem(`histo-${idMois}`);
-            location.reload();
+        if(confirm("Effacer tout le mois ?")) { 
+            localStorage.removeItem(`histo-${idMois}`); 
+            location.reload(); 
         }
     };
 
     const histoInit = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
     if(histoInit[date.getDate()]) {
         humeurDuJour = histoInit[date.getDate()].humeur;
-        const splash = document.getElementById('splash-screen');
-        if(splash) splash.style.display = 'none';
+        document.getElementById('splash-screen').style.display = 'none';
         afficherFinal();
     }
 </script>
