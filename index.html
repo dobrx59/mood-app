@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="fr" style="background-color: #f2f2f7;">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
@@ -11,9 +11,9 @@
     
     <title>Mood Tracker</title>
     <style>
-        /* Ajustement pour le plein écran total (encoche/barre d'état) */
         :root {
             --safe-top: env(safe-area-inset-top);
+            --safe-bottom: env(safe-area-inset-bottom);
         }
 
         body, html { 
@@ -37,14 +37,15 @@
         /* INTERFACE */
         .ecran-accueil { display: flex; flex-direction: column; height: 100vh; width: 100%; position: relative; align-items: center; justify-content: center; }
         
-        /* On pousse le contenu vers le bas pour ne pas être sous l'heure de l'iPhone */
+        /* Ajustements marges iPhone */
         .fleche-retour { position: absolute; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 30px; color: #8e8e93; cursor: pointer; z-index: 10; }
-        
+        #titre-raison { margin-top: calc(var(--safe-top) + 20px); }
+        .actions-finales { display: flex; gap: 10px; margin-bottom: 20px; margin-top: calc(var(--safe-top) + 20px); }
+        #ecran-confirmation { padding-bottom: var(--safe-bottom); }
+
         .bouton-principal { flex: 1; width: 100%; border: none; font-size: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
         .bouton-principal.vert { background-color: #A8E6CF; }
         .bouton-principal.rouge { background-color: #FF8B94; }
-
-        #titre-raison { margin-top: var(--safe-top); }
 
         .liste-raisons { display: flex; flex-direction: column; width: 85%; max-width: 350px; gap: 10px; margin-bottom: 15px; }
         .item-cause { display: flex; gap: 8px; width: 100%; }
@@ -55,22 +56,21 @@
         #input-nouvelle-cause { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; font-size: 16px; }
         #btn-ajouter-cause { padding: 15px; background: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        .actions-finales { display: flex; gap: 10px; margin-bottom: 20px; margin-top: var(--safe-top); }
         .bouton-onglet { border: none; padding: 12px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; transition: 0.3s; }
         .actif-vert { background-color: #A8E6CF !important; color: #3d7a63 !important; }
         .actif-rouge { background-color: #FF8B94 !important; color: #8a3d43 !important; }
 
-        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: white; padding: 20px; border-radius: 25px; }
+        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: white; padding: 20px; border-radius: 25px; margin-bottom: var(--safe-bottom); }
         .pixel { width: 35px; height: 35px; background: #eee; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
         .pixel.vert { background-color: #A8E6CF !important; }
         .pixel.rouge { background-color: #FF8B94 !important; }
 
-        .stats-container { width: 85%; max-width: 350px; }
+        .stats-container { width: 85%; max-width: 350px; padding-bottom: var(--safe-bottom); }
         .stat-card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .stat-label { font-size: 10px; color: #999; text-transform: uppercase; display: block; }
         .stat-valeur { font-size: 18px; font-weight: bold; color: #333; }
 
-        .btn-reset { margin-top: 30px; font-size: 12px; color: #ccaeae; text-decoration: underline; cursor: pointer; }
+        .btn-reset { margin-top: 20px; font-size: 12px; color: #ccaeae; text-decoration: underline; cursor: pointer; padding-bottom: 10px; }
 
         .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 6000; }
         .modal-content { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 400px; text-align: center; }
@@ -108,7 +108,6 @@
 
     <div id="ecran-confirmation" class="ecran-accueil cache fondue">
         <div class="fleche-retour" id="retour-raisons">←</div>
-        <h1>C'est noté !</h1>
         <div class="actions-finales">
             <button id="btn-voir-grille" class="bouton-onglet">Calendrier</button>
             <button id="btn-voir-stats" class="bouton-onglet">Analyses 📊</button>
