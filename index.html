@@ -2,27 +2,32 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="KOACH">
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3069/3069172.png">
-    
-    <title>KOACH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>KOACH 🐨</title>
     <style>
-        /* Ajustement pour le plein écran total (encoche/barre d'état) */
         :root {
             --safe-top: env(safe-area-inset-top);
+            --vert: #A8E6CF;
+            --rouge: #FF8B94;
+            --gris-bg: #f2f2f7;
         }
 
         body, html { 
             margin: 0; padding: 0; height: 100%; 
-            font-family: -apple-system, sans-serif; 
-            background-color: #f2f2f7; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+            background-color: var(--gris-bg); 
             overflow: hidden; 
             user-select: none;
             -webkit-tap-highlight-color: transparent;
+        }
+
+        /* EFFET DE CLIC */
+        button, .pixel, .btn-raison, .fleche-retour, .btn-suppr, .btn-reset {
+            cursor: pointer;
+            transition: transform 0.1s ease;
+        }
+        button:active, .pixel:active, .btn-raison:active, .btn-reset:active {
+            transform: scale(0.95);
         }
 
         .cache { display: none !important; }
@@ -31,259 +36,281 @@
 
         /* SPLASH SCREEN */
         #splash-screen { position: fixed; inset: 0; background-color: #ffffff; display: flex; align-items: center; justify-content: center; z-index: 5000; opacity: 1; transition: opacity 1s ease-out; }
-        .carte-accueil { font-size: 24px; font-weight: 600; color: #1c1c1e; text-align: center; }
+        .carte-accueil { font-size: 24px; font-weight: 600; color: #1c1c1e; text-align: center; opacity: 0; transform: translateY(10px); transition: opacity 0.8s ease-out, transform 0.8s ease-out; padding: 20px; }
+        .reveal-text { opacity: 1 !important; transform: translateY(0) !important; }
         .hidden-splash { opacity: 0 !important; pointer-events: none; }
 
-        /* INTERFACE */
+        /* ECRANS */
         .ecran-accueil { display: flex; flex-direction: column; height: 100vh; width: 100%; position: relative; align-items: center; justify-content: center; }
-        
-        /* On pousse le contenu vers le bas pour ne pas être sous l'heure de l'iPhone */
-        .fleche-retour { position: absolute; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 30px; color: #8e8e93; cursor: pointer; z-index: 10; }
-        
-        .bouton-principal { flex: 1; width: 100%; border: none; font-size: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
-        .bouton-principal.vert { background-color: #A8E6CF; }
-        .bouton-principal.rouge { background-color: #FF8B94; }
+        .fleche-retour { position: absolute; top: calc(var(--safe-top) + 15px); left: 20px; font-size: 30px; color: #8e8e93; z-index: 10; }
 
-        #titre-raison { margin-top: var(--safe-top); }
+        .bouton-principal { flex: 1; width: 100%; border: none; font-size: 100px; display: flex; align-items: center; justify-content: center; }
+        .bouton-principal.vert { background-color: var(--vert); }
+        .bouton-principal.rouge { background-color: var(--rouge); }
 
-        .liste-raisons { display: flex; flex-direction: column; width: 85%; max-width: 350px; gap: 10px; margin-bottom: 15px; }
-        .item-cause { display: flex; gap: 8px; width: 100%; }
-        .btn-raison { flex: 1; padding: 18px; border: none; border-radius: 15px; background: white; font-size: 17px; font-weight: 600; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; }
-        .btn-suppr { background: white; border: none; border-radius: 15px; padding: 0 15px; color: #FF8B94; font-weight: bold; cursor: pointer; }
+        /* RAISONS */
+        .liste-raisons { display: flex; flex-direction: column; width: 85%; max-width: 350px; gap: 10px; margin-bottom: 15px; overflow-y: auto; }
+        .item-cause { display: flex; gap: 8px; width: 100%; opacity: 0; animation: slideIn 0.4s ease-out forwards; }
+        @keyframes slideIn { from { opacity: 0; transform: translateX(30px); } to { opacity: 1; transform: translateX(0); } }
 
-        .zone-ajout { display: flex; width: 85%; max-width: 350px; gap: 10px; }
+        .btn-raison { flex: 1; padding: 18px; border: none; border-radius: 15px; background: white; font-size: 17px; font-weight: 600; text-align: left; box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
+        .btn-suppr { background: white; border: none; border-radius: 15px; padding: 0 15px; color: var(--rouge); font-weight: bold; }
+
+        .zone-ajout { display: flex; width: 85%; max-width: 350px; gap: 10px; padding-bottom: 20px; }
         #input-nouvelle-cause { flex: 1; padding: 15px; border-radius: 12px; border: 1px solid #ddd; outline: none; font-size: 16px; }
-        #btn-ajouter-cause { padding: 15px; background: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        #btn-ajouter-cause { padding: 15px; background: white; border: none; border-radius: 12px; font-weight: bold; }
 
+        /* GRILLE & STATS */
         .actions-finales { display: flex; gap: 10px; margin-bottom: 20px; margin-top: var(--safe-top); }
-        .bouton-onglet { border: none; padding: 12px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; transition: 0.3s; }
-        .actif-vert { background-color: #A8E6CF !important; color: #3d7a63 !important; }
-        .actif-rouge { background-color: #FF8B94 !important; color: #8a3d43 !important; }
+        .bouton-onglet { border: none; padding: 12px 20px; border-radius: 20px; font-size: 14px; font-weight: bold; background: #e5e5ea; color: #8e8e93; transition: 0.3s; }
+        .actif-vert { background-color: var(--vert) !important; color: #3d7a63 !important; }
+        .actif-rouge { background-color: var(--rouge) !important; color: #8a3d43 !important; }
 
-        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: white; padding: 20px; border-radius: 25px; }
-        .pixel { width: 35px; height: 35px; background: #eee; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
-        .pixel.vert { background-color: #A8E6CF !important; }
-        .pixel.rouge { background-color: #FF8B94 !important; }
+        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .pixel { width: 35px; height: 35px; background: #eee; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; }
+        .pixel.vert { background-color: var(--vert) !important; }
+        .pixel.rouge { background-color: var(--rouge) !important; }
 
         .stats-container { width: 85%; max-width: 350px; }
         .stat-card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 10px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         .stat-label { font-size: 10px; color: #999; text-transform: uppercase; display: block; }
         .stat-valeur { font-size: 18px; font-weight: bold; color: #333; }
+        
+        #mood-trend-container { display: flex; align-items: flex-end; gap: 6px; height: 35px; margin-top: 10px; }
+        .barre-trend { flex: 1; border-radius: 3px; min-height: 4px; }
 
-        .btn-reset { margin-top: 30px; font-size: 12px; color: #ccaeae; text-decoration: underline; cursor: pointer; }
+        /* MODALES */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 6000; }
+        .modal-content { background: white; padding: 30px; border-radius: 32px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        #input-note { width: 100%; height: 120px; padding: 15px; border-radius: 18px; border: 2px solid var(--gris-bg); background: var(--gris-bg); font-size: 16px; outline: none; resize: none; box-sizing: border-box; font-family: inherit; margin: 15px 0; }
+        #input-note:focus { border-color: var(--vert); background: #fff; }
+        #btn-valider-note { width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--vert); font-weight: bold; font-size: 16px; color: #3d7a63; box-shadow: 0 4px 10px rgba(168,230,207,0.3); }
 
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 6000; }
-        .modal-content { background: white; padding: 30px; border-radius: 30px; width: 80%; max-width: 400px; text-align: center; }
+        .btn-reset { margin: 40px auto 20px auto; font-size: 13px; color: #ccaeae; text-decoration: underline; text-align: center; display: block; width: fit-content; padding: 10px; }
     </style>
 </head>
 <body>
 
-<div id="app">
-    <div id="splash-screen">
-        <div class="carte-accueil">Alors, ton ressenti du jour ?</div>
+    <div id="splash-screen"><div class="carte-accueil"></div></div>
+
+    <div id="ecran-choix" class="ecran-accueil fondue">
+        <button class="bouton-principal vert" onclick="choisirHumeur('content')">😊</button>
+        <button class="bouton-principal rouge" onclick="choisirHumeur('pas-content')">😕</button>
     </div>
 
-    <div id="ecran-choix" class="ecran-accueil">
-        <button class="bouton-principal vert" id="btn-vert" onclick="choisirHumeur('content')">😊</button>
-        <button class="bouton-principal rouge" id="btn-rouge" onclick="choisirHumeur('pas-content')">😕</button>
-    </div>
-
-    <div id="ecran-raisons" class="ecran-accueil cache fondue">
+    <div id="ecran-raisons" class="ecran-accueil cache">
         <div class="fleche-retour" id="retour-choix">←</div>
-        <h1 id="titre-raison">Pourquoi ?</h1>
+        <h2 id="titre-reason" style="margin-top: 60px;">Pourquoi ?</h2>
         <div id="container-raisons" class="liste-raisons"></div>
         <div class="zone-ajout">
-            <input type="text" id="input-nouvelle-cause" placeholder="Ajouter..." maxlength="25">
+            <input type="text" id="input-nouvelle-cause" placeholder="Autre chose ?">
             <button id="btn-ajouter-cause">+</button>
+        </div>
+    </div>
+
+    <div id="ecran-confirmation" class="ecran-accueil cache">
+        <div class="actions-finales" style="margin-top: 40px;">
+            <button id="btn-voir-grille" class="bouton-onglet">Mon Mois</button>
+            <button id="btn-voir-stats" class="bouton-onglet">Analyse</button>
+        </div>
+        <h2 id="nom-du-mois">---</h2>
+        <div id="grille-pixels" class="grille fondue"></div>
+        <div id="section-stats" class="stats-container cache fondue">
+            <div class="stat-card">
+                <span class="stat-label">Série actuelle 🔥</span>
+                <span id="streak-count" class="stat-valeur">0 jour</span>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Tendance (7 jours)</span>
+                <div id="mood-trend-container"></div>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">Bonheur / Source</span>
+                <span id="score-bonheur" class="stat-valeur">--</span>
+                <span id="cause-majeure" style="font-size: 14px; color: #8e8e93;">--</span>
+            </div>
+            <div id="btn-reset" class="btn-reset">Réinitialiser le mois</div>
         </div>
     </div>
 
     <div id="modal-note" class="modal cache">
         <div class="modal-content fondue">
-            <h3 style="margin-top:0;">Une précision ?</h3>
-            <textarea id="input-note" placeholder="Tape ici..." rows="4" style="width:100%; border-radius:15px; border:1px solid #ddd; padding:10px; font-family:inherit; outline:none; resize:none; margin-bottom:15px; box-sizing: border-box;"></textarea>
-            <button id="btn-valider-note" class="bouton-onglet" style="width:100%; background:#A8E6CF; color:#3d7a63; padding:15px;">Terminer ✨</button>
+            <h3>Une petite note ?</h3>
+            <textarea id="input-note" placeholder="Détaille un peu ta journée..."></textarea>
+            <button id="btn-valider-note">Valider</button>
         </div>
-    </div>
-
-    <div id="ecran-confirmation" class="ecran-accueil cache fondue">
-        <div class="fleche-retour" id="retour-raisons">←</div>
-        <h1>C'est noté !</h1>
-        <div class="actions-finales">
-            <button id="btn-voir-grille" class="bouton-onglet">Calendrier</button>
-            <button id="btn-voir-stats" class="bouton-onglet">Analyses 📊</button>
-        </div>
-        <h2 id="nom-du-mois"></h2>
-        <div id="grille-pixels" class="grille"></div>
-        <div id="section-stats" class="stats-container cache">
-            <div class="stat-card">
-                <span class="stat-label">Humeur moyenne</span>
-                <span id="score-bonheur" class="stat-valeur">--</span>
-            </div>
-            <div class="stat-card">
-                <span class="stat-label">Source principale</span>
-                <span id="cause-majeure" class="stat-valeur">--</span>
-            </div>
-        </div>
-        <p id="btn-reset" class="btn-reset">Réinitialiser tout le mois</p>
     </div>
 
     <div id="modal-detail" class="modal cache">
-        <div class="modal-content">
-            <div id="modal-emoji" style="font-size: 50px;">😊</div>
-            <h2 id="modal-date" style="font-size: 16px; color: #888;">Date</h2>
-            <div id="modal-raison" style="font-size: 22px; font-weight: bold; margin: 15px 0;">Raison</div>
-            <button id="modal-close-btn" class="bouton-onglet" style="width: 100%; background: #eee;">Fermer</button>
+        <div class="modal-content fondue">
+            <div id="modal-emoji" style="font-size:40px; margin-bottom:10px;"></div>
+            <h3 id="modal-date"></h3>
+            <p id="modal-raison"></p>
+            <button id="modal-close-btn" style="margin-top:15px; padding:10px 20px; border-radius:15px; border:none; background:#eee;">Fermer</button>
         </div>
     </div>
-</div>
 
-<script type="module">
-    import confetti from "https://cdn.skypack.dev/canvas-confetti";
+    <script type="module">
+        import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
-    let humeurDuJour = "";
-    let causeChoisie = ""; 
-    const date = new Date();
-    const idMois = `${date.getFullYear()}-${date.getMonth()}`;
-    let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
+        document.addEventListener('DOMContentLoaded', () => {
+            const date = new Date();
+            const idMois = `${date.getFullYear()}-${date.getMonth()}`;
+            let humeurDuJour = "";
+            let causeChoisie = ""; 
+            let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
 
-    setTimeout(() => {
-        const splash = document.getElementById('splash-screen');
-        if(splash) {
-            splash.classList.add('hidden-splash');
-            setTimeout(() => splash.style.display = 'none', 1000);
-        }
-    }, 1500);
+            // --- VIBRATION ---
+            function vibrer(force = 10) { if (window.navigator?.vibrate) window.navigator.vibrate(force); }
 
-    function naviguer(id) {
-        document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
-        document.getElementById(id).classList.remove('cache');
-    }
-
-    function MAJOnglets(idBouton) {
-        const boutons = document.querySelectorAll('.bouton-onglet');
-        const classeHumeur = (humeurDuJour === 'content') ? 'actif-vert' : 'actif-rouge';
-        boutons.forEach(b => b.classList.remove('actif-vert', 'actif-rouge'));
-        document.getElementById(idBouton).classList.add(classeHumeur);
-    }
-
-    window.choisirHumeur = function(h) {
-        humeurDuJour = h;
-        const couleurConfetti = (h === 'content') ? ['#A8E6CF'] : ['#FF8B94'];
-        confetti({ particleCount: 40, colors: couleurConfetti });
-        naviguer('ecran-raisons');
-        document.getElementById('titre-raison').innerText = h === 'content' ? "Super ! Pourquoi ?" : "Mince... Pourquoi ?";
-        chargerCauses();
-    }
-
-    function chargerCauses() {
-        const cont = document.getElementById('container-raisons');
-        cont.innerHTML = "";
-        mesCauses.forEach((r, index) => {
-            const div = document.createElement('div');
-            div.className = "item-cause";
-            div.innerHTML = `<button class="btn-raison">${r}</button><button class="btn-suppr">×</button>`;
-            div.querySelector('.btn-raison').onclick = () => {
-                causeChoisie = r;
-                document.getElementById('modal-note').classList.remove('cache');
-                document.getElementById('input-note').focus();
-            };
-            div.querySelector('.btn-suppr').onclick = () => {
-                mesCauses.splice(index, 1);
-                localStorage.setItem('mesCauses', JSON.stringify(mesCauses));
-                chargerCauses();
-            };
-            cont.appendChild(div);
-        });
-    }
-
-    document.getElementById('btn-valider-note').onclick = () => {
-        const noteDetail = document.getElementById('input-note').value; 
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        histo[date.getDate()] = { humeur: humeurDuJour, raison: causeChoisie, note: noteDetail };
-        localStorage.setItem(`histo-${idMois}`, JSON.stringify(histo));
-        document.getElementById('modal-note').classList.add('cache');
-        document.getElementById('input-note').value = "";
-        const couleurConfetti = (humeurDuJour === 'content') ? ['#A8E6CF'] : ['#FF8B94'];
-        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 }, colors: couleurConfetti });
-        afficherFinal();
-    };
-
-    function afficherFinal() {
-        naviguer('ecran-confirmation');
-        document.getElementById('nom-du-mois').innerText = date.toLocaleDateString('fr-FR', {month:'long'});
-        document.getElementById('btn-voir-grille').click();
-        dessinerGrille();
-        calculerStats();
-    }
-
-    function dessinerGrille() {
-        const grille = document.getElementById('grille-pixels');
-        grille.innerHTML = "";
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        const nbJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
-        for(let i=1; i<=nbJours; i++) {
-            const p = document.createElement('div');
-            p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
-            p.innerText = i;
-            if(histo[i]) {
-                p.onclick = () => {
-                    document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
-                    document.getElementById('modal-date').innerText = "Le " + i;
-                    const noteTxt = histo[i].note ? `<br><small style="font-weight:normal; color:#666; font-style:italic;">"${histo[i].note}"</small>` : "";
-                    document.getElementById('modal-raison').innerHTML = histo[i].raison + noteTxt;
-                    document.getElementById('modal-detail').classList.remove('cache');
-                };
+            // --- SPLASH ---
+            const splashText = document.querySelector('.carte-accueil');
+            if(splashText) {
+                const h = date.getHours();
+                splashText.innerText = (h >= 5 && h < 12) ? "Bien dormi ? 🐨" : (h >= 12 && h < 18) ? "Bon après-midi ! ✨" : "Prends une minute pour souffler... 🌙";
+                setTimeout(() => splashText.classList.add('reveal-text'), 100); 
             }
-            grille.appendChild(p);
-        }
-    }
+            setTimeout(() => {
+                const s = document.getElementById('splash-screen');
+                if(s) { s.classList.add('hidden-splash'); setTimeout(() => s.style.display = 'none', 1000); }
+            }, 2000);
 
-    function calculerStats() {
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        const jours = Object.values(histo);
-        if(jours.length === 0) return;
-        const positifs = jours.filter(j => j.humeur === 'content').length;
-        document.getElementById('score-bonheur').innerText = Math.round((positifs / jours.length) * 100) + "% positif";
-        const counts = {};
-        jours.forEach(j => counts[j.raison] = (counts[j.raison] || 0) + 1);
-        const top = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
-        document.getElementById('cause-majeure').innerText = top;
-    }
+            // --- NAVIGATION ---
+            function naviguer(id) {
+                document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
+                document.getElementById(id).classList.remove('cache');
+            }
 
-    document.getElementById('retour-choix').onclick = () => naviguer('ecran-choix');
-    document.getElementById('retour-raisons').onclick = () => naviguer('ecran-raisons');
-    document.getElementById('modal-close-btn').onclick = () => document.getElementById('modal-detail').classList.add('cache');
+            function MAJOnglets(idBouton) {
+                const boutons = document.querySelectorAll('.bouton-onglet');
+                const classeHumeur = (humeurDuJour === 'content') ? 'actif-vert' : 'actif-rouge';
+                boutons.forEach(b => b.classList.remove('actif-vert', 'actif-rouge'));
+                document.getElementById(idBouton).classList.add(classeHumeur);
+            }
 
-    document.getElementById('btn-ajouter-cause').onclick = () => {
-        const val = document.getElementById('input-nouvelle-cause').value;
-        if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; }
-    };
+            window.choisirHumeur = function(h) {
+                vibrer(15); humeurDuJour = h;
+                confetti({ particleCount: 40, colors: h === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
+                naviguer('ecran-raisons');
+                document.getElementById('titre-reason').innerText = h === 'content' ? "Super ! Pourquoi ?" : "Mince... Pourquoi ?";
+                chargerCauses();
+            }
 
-    document.getElementById('btn-voir-grille').onclick = () => {
-        MAJOnglets('btn-voir-grille');
-        document.getElementById('grille-pixels').classList.remove('cache');
-        document.getElementById('nom-du-mois').classList.remove('cache');
-        document.getElementById('section-stats').classList.add('cache');
-    };
+            function chargerCauses() {
+                const cont = document.getElementById('container-raisons');
+                cont.innerHTML = "";
+                mesCauses.forEach((r, index) => {
+                    const div = document.createElement('div');
+                    div.className = "item-cause";
+                    div.style.animationDelay = `${index * 0.1}s`; 
+                    div.innerHTML = `<button class="btn-raison">${r}</button><button class="btn-suppr">×</button>`;
+                    div.querySelector('.btn-raison').onclick = () => {
+                        vibrer(10); causeChoisie = r;
+                        document.getElementById('modal-note').classList.remove('cache');
+                        setTimeout(() => document.getElementById('input-note').focus(), 150);
+                    };
+                    div.querySelector('.btn-suppr').onclick = () => {
+                        vibrer(5); mesCauses.splice(index, 1);
+                        localStorage.setItem('mesCauses', JSON.stringify(mesCauses));
+                        chargerCauses();
+                    };
+                    cont.appendChild(div);
+                });
+            }
 
-    document.getElementById('btn-voir-stats').onclick = () => {
-        MAJOnglets('btn-voir-stats');
-        document.getElementById('section-stats').classList.remove('cache');
-        document.getElementById('grille-pixels').classList.add('cache');
-        document.getElementById('nom-du-mois').classList.add('cache');
-    };
+            document.getElementById('btn-valider-note').onclick = () => {
+                vibrer(20);
+                const noteDetail = document.getElementById('input-note').value; 
+                const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
+                histo[date.getDate()] = { humeur: humeurDuJour, raison: causeChoisie, note: noteDetail };
+                localStorage.setItem(`histo-${idMois}`, JSON.stringify(histo));
+                document.getElementById('modal-note').classList.add('cache');
+                document.getElementById('input-note').value = "";
+                afficherFinal();
+            };
 
-    document.getElementById('btn-reset').onclick = () => {
-        if(confirm("Effacer tout le mois ?")) { localStorage.removeItem(`histo-${idMois}`); location.reload(); }
-    };
+            function afficherFinal() {
+                naviguer('ecran-confirmation');
+                document.getElementById('nom-du-mois').innerText = date.toLocaleDateString('fr-FR', {month:'long'});
+                document.getElementById('btn-voir-grille').click();
+                dessinerGrille(); calculerStats();
+            }
 
-    const histoInit = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-    if(histoInit[date.getDate()]) {
-        humeurDuJour = histoInit[date.getDate()].humeur;
-        document.getElementById('splash-screen').style.display = 'none';
-        afficherFinal();
-    }
-</script>
+            function dessinerGrille() {
+                const grille = document.getElementById('grille-pixels');
+                grille.innerHTML = "";
+                const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
+                const nbJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+                for(let i=1; i<=nbJours; i++) {
+                    const p = document.createElement('div');
+                    p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
+                    p.innerText = i;
+                    if(histo[i]) {
+                        p.onclick = () => {
+                            vibrer(5);
+                            document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
+                            document.getElementById('modal-date').innerText = "Le " + i;
+                            document.getElementById('modal-raison').innerHTML = histo[i].raison + (histo[i].note ? `<br><small style="font-weight:normal; color:#666; font-style:italic;">"${histo[i].note}"</small>` : "");
+                            document.getElementById('modal-detail').classList.remove('cache');
+                        };
+                    }
+                    grille.appendChild(p);
+                }
+            }
+
+            function calculerStats() {
+                const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
+                const jours = Object.values(histo);
+                
+                // Streak logic
+                let streak = 0, jourCheck = new Date(); 
+                if (!histo[jourCheck.getDate()]) jourCheck.setDate(jourCheck.getDate() - 1);
+                while (histo[jourCheck.getDate()]) { streak++; jourCheck.setDate(jourCheck.getDate() - 1); if (jourCheck.getMonth() !== date.getMonth()) break; }
+                document.getElementById('streak-count').innerText = streak + (streak > 1 ? " jours" : " jour");
+
+                // Trend logic
+                const container = document.getElementById('mood-trend-container');
+                container.innerHTML = "";
+                for (let i = 6; i >= 0; i--) {
+                    const d = new Date(); d.setDate(date.getDate() - i);
+                    const jourData = histo[d.getDate()];
+                    const barre = document.createElement('div');
+                    barre.className = "barre-trend";
+                    barre.style.height = !jourData ? "8px" : (jourData.humeur === 'content' ? "100%" : "40%");
+                    barre.style.background = !jourData ? "#eee" : (jourData.humeur === 'content' ? "#A8E6CF" : "#FF8B94");
+                    container.appendChild(barre);
+                }
+
+                if(jours.length === 0) return;
+                const positifs = jours.filter(j => j.humeur === 'content').length;
+                document.getElementById('score-bonheur').innerText = Math.round((positifs / jours.length) * 100) + "% positif";
+                const counts = {};
+                jours.forEach(j => counts[j.raison] = (counts[j.raison] || 0) + 1);
+                document.getElementById('cause-majeure').innerText = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
+            }
+
+            // --- EVENT LISTENERS ---
+            document.getElementById('retour-choix').onclick = () => naviguer('ecran-choix');
+            document.getElementById('modal-close-btn').onclick = () => document.getElementById('modal-detail').classList.add('cache');
+            document.getElementById('btn-ajouter-cause').onclick = () => {
+                const val = document.getElementById('input-nouvelle-cause').value;
+                if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; }
+            };
+            document.getElementById('btn-voir-grille').onclick = () => { MAJOnglets('btn-voir-grille'); document.getElementById('grille-pixels').classList.remove('cache'); document.getElementById('nom-du-mois').classList.remove('cache'); document.getElementById('section-stats').classList.add('cache'); };
+            document.getElementById('btn-voir-stats').onclick = () => { MAJOnglets('btn-voir-stats'); document.getElementById('section-stats').classList.remove('cache'); document.getElementById('grille-pixels').classList.add('cache'); document.getElementById('nom-du-mois').classList.add('cache'); };
+            
+            document.getElementById('btn-reset').onclick = () => { 
+                vibrer(30);
+                if(confirm("Effacer toutes les données de ce mois ?")) { 
+                    localStorage.removeItem(`histo-${idMois}`); 
+                    window.location.href = window.location.href; 
+                } 
+            };
+
+            // Init check
+            const histoInit = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
+            if(histoInit[date.getDate()]) { humeurDuJour = histoInit[date.getDate()].humeur; document.getElementById('splash-screen').style.display = 'none'; afficherFinal(); }
+        });
+    </script>
 </body>
 </html>
