@@ -5,59 +5,91 @@
     --text: #1c1c1e;
 }
 
+/* On empêche le scroll horizontal et on force le centrage */
 body, html { 
-    margin: 0; padding: 0; height: 100%; 
-    font-family: -apple-system, sans-serif; 
+    margin: 0; padding: 0; height: 100%; width: 100%;
+    font-family: -apple-system, system-ui, sans-serif; 
     background-color: var(--gris-bg); color: var(--text);
     overflow: hidden; 
+    display: flex;
+    flex-direction: column;
 }
 
 .cache { display: none !important; }
 .fondue { animation: fadeIn 0.4s ease-out; }
 @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-#splash-screen { position: fixed; inset: 0; background: #fff; display: flex; align-items: center; justify-content: center; z-index: 5000; transition: opacity 0.8s; }
-.carte-accueil { font-size: 24px; font-weight: 600; opacity: 0; transform: translateY(10px); transition: 0.8s; }
+/* SPLASH SCREEN - Texte réduit et centré pour iPhone */
+#splash-screen { 
+    position: fixed; inset: 0; background: #fff; 
+    display: flex; align-items: center; justify-content: center; 
+    z-index: 5000; transition: opacity 0.8s; 
+    padding: 20px; text-align: center;
+}
+.carte-accueil { 
+    font-size: 20px; /* Réduit de 24px à 20px */
+    line-height: 1.4;
+    font-weight: 600; 
+    opacity: 0; transform: translateY(10px); transition: 0.8s; 
+}
 .reveal-text { opacity: 1 !important; transform: translateY(0) !important; }
 
-.ecran-accueil { display: flex; flex-direction: column; height: 100vh; align-items: center; justify-content: flex-start; position: relative; }
-.fleche-retour { position: absolute; top: 40px; left: 20px; font-size: 30px; color: #8e8e93; cursor: pointer; padding: 10px; z-index: 100; }
+/* AJUSTEMENT ÉCRAN - On utilise flex-start pour éviter que ça remonte trop haut */
+.ecran-accueil { 
+    display: flex; flex-direction: column; 
+    height: 100vh; width: 100%;
+    align-items: center; justify-content: flex-start; 
+    position: relative; 
+    text-align: center;
+}
 
-.bouton-principal { flex: 1; width: 100%; border: none; font-size: 100px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+/* TITRES - Plus petits pour éviter le passage à la ligne */
+h2 {
+    font-size: 22px;
+    margin: 20px 0;
+    width: 90%;
+}
+
+.fleche-retour { position: absolute; top: 40px; left: 15px; font-size: 26px; color: #8e8e93; cursor: pointer; padding: 10px; z-index: 100; }
+
+.bouton-principal { flex: 1; width: 100%; border: none; font-size: 80px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .bouton-principal.vert { background-color: var(--vert); }
 .bouton-principal.rouge { background-color: var(--rouge); }
 
-.liste-raisons { display: flex; flex-direction: column; width: 85%; max-width: 350px; gap: 10px; margin-top: 20px; margin-bottom: 20px; }
-.btn-raison { flex: 1; padding: 18px; border: none; border-radius: 15px; background: white; font-size: 17px; font-weight: 600; cursor: pointer; text-align: left; }
-.btn-suppr { background: white; border: none; border-radius: 15px; padding: 0 15px; color: var(--rouge); cursor: pointer; }
+/* LISTES - Largeur max ajustée pour mobile */
+.liste-raisons { display: flex; flex-direction: column; width: 90%; max-width: 350px; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
+.btn-raison { flex: 1; padding: 16px; border: none; border-radius: 15px; background: white; font-size: 16px; font-weight: 600; cursor: pointer; text-align: left; }
+.btn-suppr { background: white; border: none; border-radius: 15px; padding: 0 12px; color: var(--rouge); cursor: pointer; }
 
-.zone-ajout { display: flex; width: 85%; max-width: 350px; background: white; padding: 6px; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
-#input-nouvelle-cause { flex: 1; border: none; padding: 12px; font-size: 16px; outline: none; background: transparent; }
-#btn-ajouter-cause { background: var(--vert); color: white; border: none; width: 44px; height: 44px; border-radius: 14px; font-size: 24px; cursor: pointer; }
+.zone-ajout { display: flex; width: 90%; max-width: 350px; background: white; padding: 5px; border-radius: 18px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); }
+#input-nouvelle-cause { flex: 1; border: none; padding: 10px; font-size: 15px; outline: none; background: transparent; }
+#btn-ajouter-cause { background: var(--vert); color: white; border: none; width: 40px; height: 40px; border-radius: 13px; font-size: 22px; cursor: pointer; }
 
-.actions-finales { display: flex; gap: 10px; margin-bottom: 30px; }
-.bouton-onglet { border: none; padding: 12px 25px; border-radius: 20px; font-size: 14px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; transition: 0.3s; }
+.actions-finales { display: flex; gap: 8px; margin-bottom: 20px; }
+.bouton-onglet { border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; }
 
 .actif-vert { background-color: var(--vert) !important; color: #3d7a63 !important; }
 .actif-rouge { background-color: var(--rouge) !important; color: #8a3d43 !important; }
 
-.grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; background: white; padding: 20px; border-radius: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-.pixel { width: 35px; height: 35px; background: #eee; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; cursor: pointer; }
+/* GRILLE - On réduit un peu la taille des pixels pour mobile */
+.grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: white; padding: 15px; border-radius: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.pixel { width: 32px; height: 32px; background: #eee; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; }
 .pixel.vert { background-color: var(--vert) !important; }
 .pixel.rouge { background-color: var(--rouge) !important; }
 
-.stats-container { width: 85%; max-width: 350px; display: flex; flex-direction: column; gap: 15px; }
-.stat-card { background: white; padding: 20px; border-radius: 20px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-.stat-label { font-size: 11px; color: #8e8e93; text-transform: uppercase; font-weight: bold; margin-bottom: 5px; display: block; }
-.stat-valeur { font-size: 22px; font-weight: bold; }
-.stat-sub { font-size: 14px; color: #666; display: block; margin-top: 5px; }
+.stats-container { width: 90%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; }
+.stat-card { background: white; padding: 15px; border-radius: 18px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+.stat-label { font-size: 10px; color: #8e8e93; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block; }
+.stat-valeur { font-size: 20px; font-weight: bold; }
+.stat-sub { font-size: 13px; color: #666; display: block; margin-top: 4px; }
 
-#mood-trend-container { display: flex; align-items: flex-end; gap: 6px; height: 40px; margin-top: 10px; }
-.barre-trend { flex: 1; border-radius: 4px; min-height: 5px; }
+#mood-trend-container { display: flex; align-items: flex-end; gap: 5px; height: 35px; margin-top: 8px; }
+.barre-trend { flex: 1; border-radius: 3px; min-height: 4px; }
 
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 6000; }
-.modal-content { background: white; padding: 30px; border-radius: 32px; width: 80%; max-width: 400px; text-align: center; }
-#input-note { width: 100%; height: 100px; padding: 15px; border-radius: 15px; border: 1px solid #ddd; background: #fafafa; font-size: 16px; margin: 15px 0; box-sizing: border-box; font-family: inherit; color: #000; }
-.btn-primary { width: 100%; padding: 18px; border-radius: 20px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; }
-.btn-modifier { margin-top: 20px; background: none; border: none; color: #8e8e93; text-decoration: underline; cursor: pointer; font-size: 13px; }
-.btn-reset { margin-top: 20px; font-size: 12px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
+/* MODALES - Ajustement hauteur input */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
+.modal-content { background: white; padding: 25px; border-radius: 28px; width: 100%; max-width: 350px; text-align: center; }
+#input-note { width: 100%; height: 90px; padding: 12px; border-radius: 14px; border: 1px solid #ddd; background: #fafafa; font-size: 16px; margin: 12px 0; box-sizing: border-box; font-family: inherit; color: #000; }
+.btn-primary { width: 100%; padding: 16px; border-radius: 18px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; }
+.btn-modifier { margin-top: 15px; background: none; border: none; color: #8e8e93; text-decoration: underline; cursor: pointer; font-size: 12px; }
+.btn-reset { margin-top: 15px; font-size: 11px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
