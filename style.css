@@ -25,58 +25,42 @@ body, html {
     z-index: 5000; transition: opacity 0.8s; 
     padding: 20px; text-align: center;
 }
-.splash-logo { font-size: 80px; animation: pulse-koala 2s infinite; }
-.splash-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; margin-bottom: 20px; }
-.carte-accueil { 
-    font-size: 20px; 
-    line-height: 1.4;
-    font-weight: 600; 
-    color: #8e8e93;
-    opacity: 0; transform: translateY(10px); transition: 0.8s; 
+.splash-logo-img { 
+    width: 120px; height: 120px; 
+    object-fit: contain; margin-bottom: 10px;
+    animation: pulse-koala 2s infinite; 
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
 }
+.splash-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; margin-bottom: 20px; }
+.carte-accueil { font-size: 20px; line-height: 1.4; font-weight: 600; color: #8e8e93; opacity: 0; transform: translateY(10px); transition: 0.8s; }
 .reveal-text { opacity: 1 !important; transform: translateY(0) !important; }
 
-@keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+@keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-.ecran-accueil { 
-    display: flex; flex-direction: column; 
-    height: 100vh; width: 100%;
-    align-items: center; justify-content: flex-start; 
-    position: relative; 
-    text-align: center;
-}
-
+.ecran-accueil { display: flex; flex-direction: column; height: 100vh; width: 100%; align-items: center; justify-content: flex-start; position: relative; text-align: center; }
 h2 { font-size: 22px; margin: 20px 0; width: 90%; }
 .fleche-retour { position: absolute; top: 40px; left: 15px; font-size: 26px; color: #8e8e93; cursor: pointer; padding: 10px; z-index: 100; }
 
-/* BOUTONS PRINCIPAUX & KOALAS */
-.bouton-principal { flex: 1; width: 100%; border: none; font-size: 80px; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-direction: column !important; }
+/* BOUTONS ET KOALAS D'ÉMOTION */
+.bouton-principal { flex: 1; width: 100%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-direction: column !important; }
 .bouton-principal.vert { background-color: var(--vert); }
 .bouton-principal.rouge { background-color: var(--rouge); }
 
 .koala-wrapper { position: relative; width: 100px; height: 100px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
 .koala-img { width: 90px; height: 90px; object-fit: contain; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.1)); }
-
 .emoji-overlay { position: absolute; top: 5px; right: 0; font-size: 30px; }
 .emoji-overlay.triste { top: 45px; right: 5px; font-size: 25px; }
 
-/* ANIMATIONS HUMEURS */
 .bounce { animation: bounce-koala 2s infinite; }
-@keyframes bounce-koala {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-15px); }
-}
+@keyframes bounce-koala { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
 .sway { animation: sway-koala 3s infinite ease-in-out; }
-@keyframes sway-koala {
-    0%, 100% { transform: rotate(-5deg); }
-    50% { transform: rotate(5deg); }
-}
+@keyframes sway-koala { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
 
-.koala-triste { filter: grayscale(0.7) brightness(0.8) drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important; transform: scale(0.85); }
+.koala-triste { filter: grayscale(0.7) brightness(0.8) drop-shadow(0 2px 4px rgba(0,0,0,0.1)) !important; }
 .label-humeur { font-size: 18px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; }
 
-/* LISTES & INPUTS */
+/* LISTE RAISONS */
 .liste-raisons { display: flex; flex-direction: column; width: 90%; max-width: 350px; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
 .btn-raison { flex: 1; padding: 16px; border: none; border-radius: 15px; background: white; font-size: 16px; font-weight: 600; cursor: pointer; text-align: left; }
 .btn-suppr { background: white; border: none; border-radius: 15px; padding: 0 12px; color: var(--rouge); cursor: pointer; }
@@ -85,10 +69,9 @@ h2 { font-size: 22px; margin: 20px 0; width: 90%; }
 #input-nouvelle-cause { flex: 1; border: none; padding: 10px; font-size: 15px; outline: none; background: transparent; }
 #btn-ajouter-cause { background: var(--vert); color: white; border: none; width: 40px; height: 40px; border-radius: 13px; font-size: 22px; cursor: pointer; }
 
-/* CALENDRIER & STATS */
+/* GRILLE ET STATS */
 .actions-finales { display: flex; gap: 8px; margin-bottom: 20px; }
 .bouton-onglet { border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; }
-
 .actif-vert { background-color: var(--vert) !important; color: #3d7a63 !important; }
 .actif-rouge { background-color: var(--rouge) !important; color: #8a3d43 !important; }
 
@@ -102,7 +85,6 @@ h2 { font-size: 22px; margin: 20px 0; width: 90%; }
 .stat-label { font-size: 10px; color: #8e8e93; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; display: block; }
 .stat-valeur { font-size: 20px; font-weight: bold; }
 .stat-sub { font-size: 13px; color: #666; display: block; margin-top: 4px; }
-
 #mood-trend-container { display: flex; align-items: flex-end; gap: 5px; height: 35px; margin-top: 8px; }
 .barre-trend { flex: 1; border-radius: 3px; min-height: 4px; }
 
@@ -113,14 +95,3 @@ h2 { font-size: 22px; margin: 20px 0; width: 90%; }
 .btn-primary { width: 100%; padding: 16px; border-radius: 18px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; }
 .btn-modifier { margin-top: 15px; background: none; border: none; color: #8e8e93; text-decoration: underline; cursor: pointer; font-size: 12px; }
 .btn-reset { margin-top: 15px; font-size: 11px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
-.splash-logo-img { 
-    width: 120px; 
-    height: 120px; 
-    object-fit: contain; 
-    margin-bottom: 10px;
-    animation: pulse-koala 2s infinite; 
-    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
-}
-
-/* On garde ton animation de base qui est déjà très bien */
-@keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
