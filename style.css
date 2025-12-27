@@ -113,3 +113,14 @@ h2 { font-size: 22px; margin: 20px 0; width: 90%; }
 .btn-primary { width: 100%; padding: 16px; border-radius: 18px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; }
 .btn-modifier { margin-top: 15px; background: none; border: none; color: #8e8e93; text-decoration: underline; cursor: pointer; font-size: 12px; }
 .btn-reset { margin-top: 15px; font-size: 11px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
+.splash-logo-img { 
+    width: 120px; 
+    height: 120px; 
+    object-fit: contain; 
+    margin-bottom: 10px;
+    animation: pulse-koala 2s infinite; 
+    filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1));
+}
+
+/* On garde ton animation de base qui est déjà très bien */
+@keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
