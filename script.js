@@ -7,15 +7,17 @@ document.addEventListener('DOMContentLoaded', () => {
     let causeChoisie = ""; 
     let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
 
-    // 1. Splash Screen
+    // Splash Screen Koach
+    const splash = document.getElementById('splash-screen-koach');
     const splashText = document.querySelector('.carte-accueil');
     const h = date.getHours();
     splashText.innerText = (h >= 5 && h < 12) ? "Bien dormi ? 🐨" : (h >= 12 && h < 18) ? "Bon après-midi ! ✨" : "Prends une minute pour souffler... 🌙";
-    setTimeout(() => splashText.classList.add('reveal-text'), 100);
+    
+    setTimeout(() => splashText.classList.add('reveal-text'), 500);
     setTimeout(() => {
-        document.getElementById('splash-screen').style.opacity = '0';
-        setTimeout(() => document.getElementById('splash-screen').style.display = 'none', 800);
-    }, 1500);
+        splash.style.opacity = '0';
+        setTimeout(() => splash.style.display = 'none', 800);
+    }, 2200);
 
     function naviguer(id) {
         document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
@@ -84,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
     function calculerStats() {
         const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
         const jours = Object.values(histo);
+        
         let streak = 0, jourCheck = new Date(); 
         if (!histo[jourCheck.getDate()]) jourCheck.setDate(jourCheck.getDate() - 1);
         while (histo[jourCheck.getDate()]) { streak++; jourCheck.setDate(jourCheck.getDate() - 1); if (jourCheck.getMonth() !== date.getMonth()) break; }
@@ -137,20 +140,12 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('btn-modifier-jour').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); naviguer('ecran-choix'); };
     
     document.getElementById('real-reset-btn').onclick = () => {
-        if(confirm("Effacer les données du mois ?")) { 
-            localStorage.removeItem(`histo-${idMois}`); 
-            naviguer('ecran-choix'); 
-        }
+        if(confirm("Effacer les données ?")) { localStorage.removeItem(`histo-${idMois}`); naviguer('ecran-choix'); }
     };
 
     document.getElementById('btn-ajouter-cause').onclick = () => {
         const val = document.getElementById('input-nouvelle-cause').value;
-        if(val.trim()) { 
-            mesCauses.push(val.trim()); 
-            localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); 
-            chargerCauses(); 
-            document.getElementById('input-nouvelle-cause').value = ""; 
-        }
+        if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; }
     };
 
     const histoInit = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
