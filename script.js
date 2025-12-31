@@ -1,16 +1,22 @@
 import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
 document.addEventListener('DOMContentLoaded', () => {
-    const date = new Date();
-    const idMois = `${date.getFullYear()}-${date.getMonth()}`;
+    const dateAujourdhui = new Date();
+    let vueMois = dateAujourdhui.getMonth();
+    let vueAnnee = dateAujourdhui.getFullYear();
+    
+    // VARIABLE CORRECTIVE : pour savoir quel jour on modifie
+    let jourEnModification = null; 
+    
+    const obtenirIdMois = (m, a) => `histo-${a}-${m}`;
+    
     let humeurDuJour = "";
     let causeChoisie = ""; 
     let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
 
-    // Splash Screen Koach
     const splash = document.getElementById('splash-screen-koach');
     const splashText = document.querySelector('.carte-accueil');
-    const h = date.getHours();
+    const h = dateAujourdhui.getHours();
     splashText.innerText = (h >= 5 && h < 12) ? "Bien dormi ? 🐨" : (h >= 12 && h < 18) ? "Bon après-midi ! ✨" : "Prends une minute pour souffler... 🌙";
     
     setTimeout(() => splashText.classList.add('reveal-text'), 500);
@@ -46,17 +52,44 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('btn-valider-note').onclick = () => {
         const note = document.getElementById('input-note').value;
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        histo[date.getDate()] = { humeur: humeurDuJour, raison: causeChoisie, note: note };
-        localStorage.setItem(`histo-${idMois}`, JSON.stringify(histo));
+        
+        // CORRECTION : On utilise jourEnModification s'il existe, sinon la date du jour
+        const jourASauver = jourEnModification || dateAujourdhui.getDate();
+        const moisASauver = (jourEnModification) ? vueMois : dateAujourdhui.getMonth();
+        const anneeASauver = (jourEnModification) ? vueAnnee : dateAujourdhui.getFullYear();
+        
+        const idCible = obtenirIdMois(moisASauver, anneeASauver);
+        const histo = JSON.parse(localStorage.getItem(idCible)) || {};
+        
+        histo[jourASauver] = { humeur: humeurDuJour, raison: causeChoisie, note: note };
+        localStorage.setItem(idCible, JSON.stringify(histo));
+        
         document.getElementById('modal-note').classList.add('cache');
         confetti({ particleCount: 150, spread: 70, colors: humeurDuJour === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
+        
+        // On remet à zéro après la sauvegarde
+        jourEnModification = null;
         afficherFinal();
     };
 
     function afficherFinal() {
         naviguer('ecran-confirmation');
-        document.getElementById('nom-du-mois').innerText = date.toLocaleDateString('fr-FR', {month:'long'});
+        const nomMoisClair = new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+        document.getElementById('nom-du-mois').innerHTML = `
+            <span id="prev-mois" style="cursor:pointer; padding:10px;">‹</span>
+            ${nomMoisClair}
+            <span id="next-mois" style="cursor:pointer; padding:10px;">›</span>
+        `;
+        
+        document.getElementById('prev-mois').onclick = () => {
+            if(vueMois === 0) { vueMois = 11; vueAnnee--; } else { vueMois--; }
+            afficherFinal();
+        };
+        document.getElementById('next-mois').onclick = () => {
+            if(vueMois === 11) { vueMois = 0; vueAnnee++; } else { vueMois++; }
+            afficherFinal();
+        };
+
         dessinerGrille(); 
         calculerStats();
         switchTab('grille');
@@ -65,16 +98,19 @@ document.addEventListener('DOMContentLoaded', () => {
     function dessinerGrille() {
         const grille = document.getElementById('grille-pixels');
         grille.innerHTML = "";
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        const nbJours = new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate();
+        const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
+        const nbJours = new Date(vueAnnee, vueMois + 1, 0).getDate();
+        
         for(let i=1; i<=nbJours; i++) {
             const p = document.createElement('div');
             p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
             p.innerText = i;
             if(histo[i]) {
                 p.onclick = () => {
+                    // ON RETIENT LE JOUR CLIQUÉ
+                    jourEnModification = i; 
                     document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
-                    document.getElementById('modal-date').innerText = "Le " + i;
+                    document.getElementById('modal-date').innerText = i + " " + new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long'});
                     document.getElementById('modal-raison').innerHTML = `<strong>${histo[i].raison}</strong>` + (histo[i].note ? `<br>"${histo[i].note}"` : "");
                     document.getElementById('modal-detail').classList.remove('cache');
                 };
@@ -84,19 +120,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function calculerStats() {
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
+        const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
         const jours = Object.values(histo);
         
-        let streak = 0, jourCheck = new Date(); 
-        if (!histo[jourCheck.getDate()]) jourCheck.setDate(jourCheck.getDate() - 1);
-        while (histo[jourCheck.getDate()]) { streak++; jourCheck.setDate(jourCheck.getDate() - 1); if (jourCheck.getMonth() !== date.getMonth()) break; }
+        let streak = 0;
+        let jourCheck = new Date(dateAujourdhui);
+        let idCheck = obtenirIdMois(jourCheck.getMonth(), jourCheck.getFullYear());
+        let histoCheck = JSON.parse(localStorage.getItem(idCheck)) || {};
+
+        if (!histoCheck[jourCheck.getDate()]) jourCheck.setDate(jourCheck.getDate() - 1);
+        
+        while (true) {
+            idCheck = obtenirIdMois(jourCheck.getMonth(), jourCheck.getFullYear());
+            histoCheck = JSON.parse(localStorage.getItem(idCheck)) || {};
+            if (histoCheck[jourCheck.getDate()]) {
+                streak++;
+                jourCheck.setDate(jourCheck.getDate() - 1);
+            } else {
+                break;
+            }
+        }
         document.getElementById('streak-count').innerText = streak + " jour(s)";
 
         const container = document.getElementById('mood-trend-container');
         container.innerHTML = "";
         for (let i = 6; i >= 0; i--) {
-            const d = new Date(); d.setDate(date.getDate() - i);
-            const dataJ = histo[d.getDate()];
+            const d = new Date(dateAujourdhui); d.setDate(dateAujourdhui.getDate() - i);
+            const hTrend = JSON.parse(localStorage.getItem(obtenirIdMois(d.getMonth(), d.getFullYear()))) || {};
+            const dataJ = hTrend[d.getDate()];
             const barre = document.createElement('div');
             barre.className = "barre-trend";
             barre.style.height = !dataJ ? "8px" : (dataJ.humeur === 'content' ? "100%" : "40%");
@@ -111,13 +162,17 @@ document.addEventListener('DOMContentLoaded', () => {
             jours.forEach(j => counts[j.raison] = (counts[j.raison] || 0) + 1);
             const top = Object.keys(counts).reduce((a, b) => counts[a] > counts[b] ? a : b);
             document.getElementById('cause-majeure').innerText = "Source majeure : " + top;
+        } else {
+            document.getElementById('score-bonheur').innerText = "--";
+            document.getElementById('cause-majeure').innerText = "Aucune donnée ce mois";
         }
     }
 
     function switchTab(tab) {
         const isGrille = tab === 'grille';
-        const histo = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-        const humeurJour = histo[date.getDate()]?.humeur || 'content';
+        const idActuel = obtenirIdMois(dateAujourdhui.getMonth(), dateAujourdhui.getFullYear());
+        const histoActuel = JSON.parse(localStorage.getItem(idActuel)) || {};
+        const humeurJour = histoActuel[dateAujourdhui.getDate()]?.humeur || 'content';
         const classeActif = humeurJour === 'content' ? 'actif-vert' : 'actif-rouge';
 
         document.getElementById('grille-pixels').classList.toggle('cache', !isGrille);
@@ -133,14 +188,28 @@ document.addEventListener('DOMContentLoaded', () => {
         else btnS.classList.add(classeActif);
     }
 
-    document.getElementById('btn-retour-choix').onclick = () => naviguer('ecran-choix');
+    document.getElementById('btn-retour-choix').onclick = () => {
+        jourEnModification = null; // Reset si on revient en arrière
+        naviguer('ecran-choix');
+    };
+    
     document.getElementById('btn-tab-grille').onclick = () => switchTab('grille');
     document.getElementById('btn-tab-stats').onclick = () => switchTab('stats');
-    document.getElementById('modal-close-btn').onclick = () => document.getElementById('modal-detail').classList.add('cache');
-    document.getElementById('btn-modifier-jour').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); naviguer('ecran-choix'); };
+    document.getElementById('modal-close-btn').onclick = () => {
+        jourEnModification = null;
+        document.getElementById('modal-detail').classList.add('cache');
+    };
+    
+    document.getElementById('btn-modifier-jour').onclick = () => {
+        document.getElementById('modal-detail').classList.add('cache');
+        naviguer('ecran-choix');
+    };
     
     document.getElementById('real-reset-btn').onclick = () => {
-        if(confirm("Effacer les données ?")) { localStorage.removeItem(`histo-${idMois}`); naviguer('ecran-choix'); }
+        if(confirm("Effacer les données de ce mois uniquement ?")) { 
+            localStorage.removeItem(obtenirIdMois(vueMois, vueAnnee)); 
+            afficherFinal(); 
+        }
     };
 
     document.getElementById('btn-ajouter-cause').onclick = () => {
@@ -148,6 +217,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; }
     };
 
-    const histoInit = JSON.parse(localStorage.getItem(`histo-${idMois}`)) || {};
-    if(histoInit[date.getDate()]) afficherFinal();
+    const idInit = obtenirIdMois(dateAujourdhui.getMonth(), dateAujourdhui.getFullYear());
+    const histoInit = JSON.parse(localStorage.getItem(idInit)) || {};
+    if(histoInit[dateAujourdhui.getDate()]) {
+        vueMois = dateAujourdhui.getMonth();
+        vueAnnee = dateAujourdhui.getFullYear();
+        afficherFinal();
+    }
 });
