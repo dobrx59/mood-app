@@ -4,457 +4,244 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KOACH v2.0</title>
-    <link rel="manifest" href="manifest.json">
     <style>
         :root { 
-            --vert: #A8E6CF; 
-            --rouge: #FF8B94; 
-            --gris-bg: #f2f2f7; 
-            --text: #1c1c1e; 
-            --card-bg: #ffffff;
-            --tab-bg: rgba(255, 255, 255, 0.85);
-            --border: #d1d1d6;
+            --vert: #A8E6CF; --rouge: #FF8B94; --gris-bg: #f2f2f7; 
+            --text: #1c1c1e; --card-bg: #ffffff; --border: #d1d1d6;
         }
-
         body.dark-mode {
-            --gris-bg: #1c1c1e;
-            --text: #f2f2f7;
-            --card-bg: #2c2c2e;
-            --tab-bg: rgba(28, 28, 30, 0.9);
-            --border: #3a3a3c;
+            --gris-bg: #1c1c1e; --text: #f2f2f7; --card-bg: #2c2c2e; --border: #3a3a3c;
         }
-
-        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; background-color: var(--gris-bg); color: var(--text); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; background-color: var(--gris-bg); color: var(--text); overflow-x: hidden; transition: 0.3s; }
         .cache { display: none !important; }
         .fondue { animation: fadeIn 0.4s ease-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* SPLASH SCREEN */
-        #splash-screen-koach { position: fixed; inset: 0; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; transition: opacity 0.8s; padding: 20px; text-align: center; }
-        .splash-logo-img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; animation: pulse-koala 2s infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
-        .splash-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; margin-bottom: 20px; }
-        .carte-accueil { font-size: 20px; line-height: 1.4; font-weight: 600; color: #8e8e93; opacity: 0; transform: translateY(10px); transition: 0.8s; }
-        .reveal-text { opacity: 1 !important; transform: translateY(0) !important; }
-        @keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        /* SPLASH */
+        #splash-screen-koach { position: fixed; inset: 0; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; transition: 0.8s; text-align: center; }
+        .splash-logo-img { width: 120px; animation: pulse 2s infinite; }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
 
-        /* NAVIGATION TAB BAR */
-        #app { width: 100%; min-height: 100vh; padding-bottom: 90px; }
-        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--tab-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid var(--border); z-index: 4000; padding-bottom: 15px; }
-        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #8e8e93; font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; }
+        /* NAV */
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--card-bg); display: flex; border-top: 0.5px solid var(--border); z-index: 4000; padding-bottom: 15px; }
+        .tab-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #8e8e93; font-size: 10px; font-weight: 600; cursor: pointer; }
         .tab-item.active { color: var(--text); }
         .tab-icon { font-size: 24px; }
 
-        /* KOACH CORE */
-        .ecran-accueil { display: flex; flex-direction: column; min-height: 80vh; width: 100%; align-items: center; justify-content: flex-start; position: relative; text-align: center; }
-        .bouton-principal { flex: 1; width: 100%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-direction: column !important; min-height: 250px; }
-        .bouton-principal.vert { background-color: var(--vert); }
-        .bouton-principal.rouge { background-color: var(--rouge); }
-        .koala-wrapper { position: relative; width: 100px; height: 100px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
-        .koala-img { width: 90px; height: 90px; object-fit: contain; }
-        .bounce { animation: bounce-koala 2s infinite; }
-        @keyframes bounce-koala { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
-        .sway { animation: sway-koala 3s infinite ease-in-out; }
-        @keyframes sway-koala { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
-        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--card-bg); padding: 15px; border-radius: 20px; margin: 0 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .pixel { width: 32px; height: 32px; background: #eee; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; color: #333; }
-        .pixel.vert { background-color: var(--vert) !important; color: #1c1c1e; }
-        .pixel.rouge { background-color: var(--rouge) !important; color: #1c1c1e; }
-
-        /* ANALYSE & STATS */
-        .stats-container { width: 90%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; margin: 0 auto; }
-        .stat-card { background: var(--card-bg); padding: 15px; border-radius: 18px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .stat-label { font-size: 10px; font-weight: bold; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; }
-        .stat-valeur { font-size: 22px; font-weight: bold; display: block; margin-top: 4px; }
-        .stat-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; display: block; }
+        /* APP CONTENT */
+        .ecran-accueil { display: flex; flex-direction: column; min-height: 80vh; align-items: center; }
+        .bouton-principal { flex: 1; width: 100%; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .vert { background: var(--vert); } .rouge { background: var(--rouge); }
+        .koala-img { width: 90px; }
+        
+        /* GRILLE & STATS */
+        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--card-bg); padding: 15px; border-radius: 20px; margin: 15px; }
+        .pixel { width: 35px; height: 35px; background: #eee; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; }
+        body.dark-mode .pixel { background: #3a3a3c; }
+        .pixel.p-vert { background: var(--vert) !important; color: #1c1c1e; }
+        .pixel.p-rouge { background: var(--rouge) !important; color: #1c1c1e; }
+        
+        .stat-card { background: var(--card-bg); padding: 15px; border-radius: 18px; margin: 10px 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); text-align: left; }
         .repartition-bar { height: 8px; width: 100%; background: #eee; border-radius: 4px; margin-top: 10px; display: flex; overflow: hidden; }
-        body.dark-mode .repartition-bar { background: #3a3a3c; }
-
-        /* MISSIONS */
-        .goal-group { width: 90%; max-width: 400px; margin: 0 auto 30px auto; }
-        .group-title { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
-        .goal-item { background: var(--card-bg); padding: 16px; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
-        .goal-text { font-weight: 600; font-size: 15px; display: block; }
-        .goal-meta { font-size: 11px; color: #8e8e93; }
-        .goal-actions { display: flex; gap: 8px; }
-        .btn-status { border: none; border-radius: 10px; padding: 8px; cursor: pointer; font-size: 14px; }
-        .btn-done { background: #e8f5e9; color: #2e7d32; }
-        .btn-fail { background: #ffebee; color: #c62828; }
-        .goal-completed { opacity: 0.6; text-decoration: line-through; }
-        .input-modern, .input-modern-stack { background: #e5e5ea; padding: 8px; border-radius: 16px; display: flex; align-items: center; margin-bottom: 10px; }
-        body.dark-mode .input-modern, body.dark-mode .input-modern-stack { background: #3a3a3c; }
-        .input-modern input, .input-modern-stack input { background: transparent; border: none; outline: none; padding: 10px; flex: 1; font-family: inherit; font-size: 14px; color: inherit; }
-        .input-modern button, .input-modern-stack button { background: var(--text); color: var(--gris-bg); border: none; border-radius: 12px; width: 35px; height: 35px; cursor: pointer; }
-
-        /* RÉGLAGES */
-        .setting-row { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 16px; border-radius: 18px; margin-top: 10px; }
-        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
-        input:checked + .slider { background-color: var(--vert); }
-        input:checked + .slider:before { transform: translateX(24px); }
 
         /* MODALES */
-        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
-        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 350px; text-align: center; }
-        .btn-primary { width: 100%; padding: 16px; border-radius: 18px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; color: #1c1c1e; }
-        
-        .btn-raison { flex: 1; padding: 16px; border: none; border-radius: 15px; background: var(--card-bg); font-size: 16px; font-weight: 600; cursor: pointer; text-align: left; color: var(--text); }
-        .btn-suppr { background: var(--card-bg); border: none; border-radius: 15px; padding: 0 12px; color: var(--rouge); cursor: pointer; }
-        .liste-raisons { display: flex; flex-direction: column; width: 90%; max-width: 350px; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
-        .bouton-onglet { border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; }
-        body.dark-mode .bouton-onglet { background: #3a3a3c; }
-        .btn-reset { margin-top: 15px; font-size: 11px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
-        .fleche-retour { position: absolute; top: 40px; left: 15px; font-size: 26px; color: #8e8e93; cursor: pointer; padding: 10px; z-index: 100; }
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 25px; width: 100%; max-width: 320px; text-align: center; }
+        .btn-action { width: 100%; padding: 15px; border-radius: 15px; border: none; background: var(--vert); font-weight: bold; margin-top: 10px; cursor: pointer; }
+        .btn-raison { width: 100%; padding: 12px; margin: 4px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--card-bg); color: var(--text); text-align: left; cursor: pointer; }
     </style>
 </head>
 <body>
 
 <div id="splash-screen-koach">
-    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="splash-logo-img" alt="Logo KOACH">
-    <div class="splash-title">KOACH</div>
-    <div class="carte-accueil"></div>
+    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="splash-logo-img">
+    <h2 style="letter-spacing: 3px;">KOACH</h2>
+    <div id="splash-msg" style="color:#8e8e93">Chargement...</div>
 </div>
 
 <div id="app">
-    <section id="section-koach" class="tab-content">
+    <section id="section-koach">
         <div id="ecran-choix" class="ecran-accueil fondue">
             <button class="bouton-principal vert" onclick="choisirHumeur('content')">
-                <div class="koala-wrapper bounce">
-                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="koala-img" alt="Koala Content">
-                    <span class="emoji-overlay">✨</span>
-                </div>
-                <span class="label-humeur">Trop bien !</span>
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="koala-img">
+                <span style="font-weight: bold; margin-top:10px;">Trop bien ! ✨</span>
             </button>
-            <button class="bouton-principal rouge" onclick="choisirHumeur('pas-content')">
-                <div class="koala-wrapper sway">
-                    <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="koala-img koala-triste" alt="Koala Triste">
-                    <span class="emoji-overlay triste">💧</span>
-                </div>
-                <span class="label-humeur">C'est dur...</span>
+            <button class="bouton-principal rouge" onclick="choisirHumeur('triste')">
+                <img src="https://raw.githubusercontent.com/microsoft/fluentui-emoji/main/assets/Koala/3D/koala_3d.png" class="koala-img" style="filter: grayscale(0.5);">
+                <span style="font-weight: bold; margin-top:10px;">C'est dur... 💧</span>
             </button>
         </div>
 
-        <div id="ecran-raisons" class="ecran-accueil cache">
-            <div class="fleche-retour" id="btn-retour-choix">←</div>
-            <h2 id="titre-reason" style="margin-top: 60px; text-align: center; width: 100%;">Pourquoi ?</h2>
-            <div id="container-raisons" class="liste-raisons" style="margin: 0 auto;"></div>
-            <div class="zone-ajout" style="display:flex; width:90%; margin: 10px auto; background:var(--card-bg); border-radius:15px; padding:5px; border: 1px solid var(--border);">
-                <input type="text" id="input-nouvelle-cause" placeholder="Ajouter une raison..." style="flex:1; border:none; padding:10px; outline:none; background:transparent; color:inherit;">
-                <button id="btn-ajouter-cause" style="background:var(--vert); border:none; border-radius:10px; width:40px; color:#1c1c1e;">+</button>
-            </div>
+        <div id="ecran-raisons" class="ecran-accueil cache fondue" style="padding: 20px;">
+            <div onclick="retourChoix()" style="align-self: flex-start; cursor:pointer;">← Retour</div>
+            <h2>Pourquoi ?</h2>
+            <div id="liste-raisons" style="width: 100%;"></div>
         </div>
 
-        <div id="ecran-confirmation" class="ecran-accueil cache">
-            <div class="actions-finales" style="margin-top: 40px; display:flex; gap:10px; justify-content:center;">
-                <button id="btn-tab-grille" class="bouton-onglet">Mon Mois</button>
-                <button id="btn-tab-stats" class="bouton-onglet">Analyse</button>
+        <div id="ecran-bilan" class="ecran-accueil cache fondue">
+            <div style="margin: 20px 0; display: flex; gap: 10px;">
+                <button onclick="voirMois()" id="btn-mois" style="padding: 8px 15px; border-radius: 10px; border: none; background: #ddd;">Mon Mois</button>
+                <button onclick="voirStats()" id="btn-stats" style="padding: 8px 15px; border-radius: 10px; border: none; background: #ddd;">Analyse</button>
             </div>
-            <h2 id="nom-du-mois" style="text-align: center; width:100%;">---</h2>
-            <div id="grille-pixels" class="grille fondue"></div>
             
-            <div id="section-stats" class="stats-container cache fondue">
+            <h3 id="titre-mois">Février 2026</h3>
+
+            <div id="vue-grille" class="grille"></div>
+
+            <div id="vue-stats" class="cache" style="width: 100%;">
                 <div class="stat-card">
-                    <span class="stat-label">Série actuelle 🔥</span>
-                    <span id="streak-count" class="stat-valeur">--</span>
+                    <div style="font-size: 10px; color: #8e8e93; font-weight: bold;">SÉRIE ACTUELLE 🔥</div>
+                    <div id="stat-streak" style="font-size: 24px; font-weight: bold;">--</div>
                 </div>
                 <div class="stat-card">
-                    <span class="stat-label">Bonheur Global 🐨</span>
-                    <span id="score-bonheur" class="stat-valeur">--</span>
+                    <div style="font-size: 10px; color: #8e8e93; font-weight: bold;">BONHEUR GLOBAL 🐨</div>
+                    <div id="stat-bonheur" style="font-size: 24px; font-weight: bold;">--</div>
                     <div class="repartition-bar">
-                        <div id="bar-vert" style="height:100%; background:var(--vert);"></div>
-                        <div id="bar-rouge" style="height:100%; background:var(--rouge);"></div>
+                        <div id="bar-v" style="background:var(--vert); width: 50%;"></div>
+                        <div id="bar-r" style="background:var(--rouge); width: 50%;"></div>
                     </div>
                 </div>
-                <div class="stat-card">
-                    <span class="stat-label">Majorité du mois 🏆</span>
-                    <span id="cause-majeure" class="stat-valeur">--</span>
-                    <span id="cause-sub" class="stat-sub">Aucune donnée</span>
-                </div>
-                <div id="real-reset-btn" class="btn-reset">Réinitialiser le mois</div>
+                <div id="reset-data" style="text-align:center; font-size:12px; color:red; margin-top:20px; cursor:pointer;">Réinitialiser le mois</div>
             </div>
-        </div>
-    </section>
-
-    <section id="section-goals" class="tab-content cache" style="padding: 25px 20px;">
-        <h1 style="text-align: left; width: 100%; margin-bottom: 20px;">Missions 🎯</h1>
-        <div class="goal-group">
-            <h3 class="group-title">MA JOURNÉE</h3>
-            <div id="liste-goals-du-jour"></div>
-            <div class="input-modern">
-                <input type="text" id="input-daily-goal" placeholder="Nouvelle mission aujourd'hui...">
-                <button onclick="ajouterObjectif('daily')">+</button>
-            </div>
-        </div>
-        <div class="goal-group">
-            <h3 class="group-title">PROJETS À LONG TERME</h3>
-            <div id="liste-goals-long"></div>
-            <div class="input-modern-stack" style="flex-direction: column; align-items: stretch;">
-                <input type="text" id="input-long-goal" placeholder="Nom du projet...">
-                <div style="display: flex; gap: 8px; margin-top: 8px;">
-                    <input type="date" id="input-long-date" style="flex: 1; background: rgba(128,128,128,0.1); border-radius: 8px; border:none; padding:5px; color:inherit;">
-                    <button onclick="ajouterObjectif('long')" style="width: 50px;">+</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section id="section-settings" class="tab-content cache" style="padding: 25px 20px;">
-        <h1 style="text-align: left; width: 100%;">Réglages ⚙️</h1>
-        <div class="setting-row">
-            <span>Mode Sombre 🌙</span>
-            <label class="switch">
-                <input type="checkbox" id="dark-mode-toggle">
-                <span class="slider"></span>
-            </label>
-        </div>
-        <div class="setting-row">
-            <span>Rappels quotidiens 🔔</span>
-            <button id="btn-notif-enable" style="background: var(--vert); border: none; border-radius: 10px; padding: 8px 15px; font-weight: bold; cursor: pointer;">Activer</button>
-        </div>
-        <div style="padding: 10px; font-size: 11px; color: #8e8e93;">
-            Alertes à 8h (Setup), 20h (Check-up) et 21h (Bilan).
-        </div>
-        
-        <div class="stat-card" style="width:100%; margin-top:20px; box-sizing: border-box;">
-            <p><strong>KOACH v2.0</strong> 🐨</p>
-            <p style="color:#8e8e93; font-size:14px;">Ton compagnon de route quotidien.</p>
         </div>
     </section>
 
     <nav class="tab-bar">
-        <div class="tab-item active" onclick="switchMainTab('koach', this)">
-            <span class="tab-icon">🐨</span>
-            <span>KOACH</span>
-        </div>
-        <div class="tab-item" onclick="switchMainTab('goals', this)">
-            <span class="tab-icon">🎯</span>
-            <span>MISSIONS</span>
-        </div>
-        <div class="tab-item" onclick="switchMainTab('settings', this)">
-            <span class="tab-icon">⚙️</span>
-            <span>RÉGLAGES</span>
-        </div>
+        <div class="tab-item active"><span class="tab-icon">🐨</span><span>KOACH</span></div>
+        <div class="tab-item" onclick="alert('Bientôt disponible !')"><span class="tab-icon">🎯</span><span>MISSIONS</span></div>
+        <div class="tab-item" onclick="toggleDark()"><span class="tab-icon">🌙</span><span>MODE</span></div>
     </nav>
 </div>
 
 <div id="modal-note" class="modal cache">
     <div class="modal-content">
         <h3>Une petite note ?</h3>
-        <textarea id="input-note" placeholder="Détaille un peu ta journée..." style="width: 100%; height: 80px; margin-bottom: 15px; border-radius: 10px; padding: 10px; border: 1px solid var(--border); background: transparent; color: inherit;"></textarea>
-        <button id="btn-valider-note" class="btn-primary">Valider</button>
-    </div>
-</div>
-
-<div id="modal-detail" class="modal cache">
-    <div class="modal-content">
-        <div id="modal-emoji" style="font-size:40px; margin-bottom:10px;"></div>
-        <h3 id="modal-date"></h3>
-        <p id="modal-raison"></p>
-        <button id="modal-close-btn" class="btn-primary" style="background:#8e8e93; color:white; margin-bottom:10px;">Fermer</button>
-        <button id="btn-modifier-jour" style="background:none; border:none; text-decoration:underline; font-size:12px; color:#8e8e93; cursor:pointer;">Modifier cette journée</button>
+        <textarea id="note-texte" style="width:100%; height:80px; border-radius:10px; padding:10px; border:1px solid var(--border); background:transparent; color:inherit;"></textarea>
+        <button class="btn-action" onclick="sauvegarderJournee()">Valider</button>
     </div>
 </div>
 
 <script type="module">
     import confetti from "https://cdn.skypack.dev/canvas-confetti";
 
-    // SERVICE WORKER & NOTIFS LOGIC
-    if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js').then(reg => {
-                console.log('KOACH SW Enregistré');
-            }).catch(err => console.log('SW Error', err));
-        });
-    }
-
-    async function requestNotificationPermission() {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-            alert("Super ! KOACH t'enverra tes rappels quotidiens.");
-            // On pourrait programmer ici via l'API Local Notifications ou un backend
-            // Pour une PWA pure, on simule l'intention. 
-            // Les vraies notifs programmées nécessitent un Service Worker actif avec "showNotification"
-        }
-    }
-
+    let humeurActuelle = "";
+    let raisonActuelle = "";
+    const raisonsBase = ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs", "😴 Sommeil"];
+    
+    // --- INIT ---
     document.addEventListener('DOMContentLoaded', () => {
-        const dateAujourdhui = new Date();
-        let vueMois = dateAujourdhui.getMonth();
-        let vueAnnee = dateAujourdhui.getFullYear();
-        let jourEnModification = null; 
-        let mesObjectifs = JSON.parse(localStorage.getItem('mesObjectifs')) || [];
-        let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
-        let humeurDuJour = "";
-        let causeChoisie = "";
+        const h = new Date().getHours();
+        document.getElementById('splash-msg').innerText = h < 12 ? "Bien dormi ? 🐨" : "On fait le point ? ✨";
+        
+        setTimeout(() => {
+            document.getElementById('splash-screen-koach').style.opacity = '0';
+            setTimeout(() => document.getElementById('splash-screen-koach').classList.add('cache'), 800);
+        }, 1500);
 
-        const obtenirIdMois = (m, a) => `histo-${a}-${m}`;
-
-        // DARK MODE
-        const darkModeToggle = document.getElementById('dark-mode-toggle');
-        const isDark = localStorage.getItem('darkMode') === 'true';
-        if (isDark) { document.body.classList.add('dark-mode'); darkModeToggle.checked = true; }
-        darkModeToggle.onchange = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', darkModeToggle.checked); };
-
-        // NOTIFS BUTTON
-        document.getElementById('btn-notif-enable').onclick = requestNotificationPermission;
-
-        // SPLASH
-        const splash = document.getElementById('splash-screen-koach');
-        const splashText = document.querySelector('.carte-accueil');
-        const h = dateAujourdhui.getHours();
-        splashText.innerText = (h >= 5 && h < 12) ? "Bien dormi ? 🐨" : (h >= 12 && h < 18) ? "Bon après-midi ! ✨" : "Prends une minute pour souffler... 🌙";
-        setTimeout(() => splashText.classList.add('reveal-text'), 500);
-        setTimeout(() => { splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 800); }, 2200);
-
-        // NAV
-        window.switchMainTab = function(target, element) {
-            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('cache'));
-            document.getElementById('section-' + target).classList.remove('cache');
-            document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
-            element.classList.add('active');
-            if (target === 'goals') afficherObjectifs();
-        };
-
-        // KOACH LOGIC
-        window.choisirHumeur = function(h) {
-            humeurDuJour = h;
-            confetti({ particleCount: 30, colors: h === 'content' ? ['#A8E6CF'] : ['#FF8B94'], origin: { y: 0.7 } });
-            document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
-            document.getElementById('ecran-raisons').classList.remove('cache');
-            chargerCauses();
-        };
-
-        function chargerCauses() {
-            const cont = document.getElementById('container-raisons');
-            cont.innerHTML = "";
-            mesCauses.forEach((r, index) => {
-                const div = document.createElement('div');
-                div.style.display = "flex"; div.style.gap = "8px";
-                div.innerHTML = `<button class="btn-raison">${r}</button><button class="btn-suppr">×</button>`;
-                div.querySelector('.btn-raison').onclick = () => { causeChoisie = r; document.getElementById('modal-note').classList.remove('cache'); };
-                div.querySelector('.btn-suppr').onclick = () => { mesCauses.splice(index, 1); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); };
-                cont.appendChild(div);
-            });
-        }
-
-        document.getElementById('btn-valider-note').onclick = () => {
-            const note = document.getElementById('input-note').value;
-            const jS = jourEnModification || dateAujourdhui.getDate();
-            const mS = (jourEnModification !== null) ? vueMois : dateAujourdhui.getMonth();
-            const aS = (jourEnModification !== null) ? vueAnnee : dateAujourdhui.getFullYear();
-            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(mS, aS))) || {};
-            histo[jS] = { humeur: humeurDuJour, raison: causeChoisie, note: note };
-            localStorage.setItem(obtenirIdMois(mS, aS), JSON.stringify(histo));
-            document.getElementById('modal-note').classList.add('cache');
-            confetti({ particleCount: 150, spread: 70, colors: humeurDuJour === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
-            jourEnModification = null;
-            afficherFinal();
-        };
-
-        function afficherFinal() {
-            document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
-            document.getElementById('ecran-confirmation').classList.remove('cache');
-            const nomMoisClair = new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
-            document.getElementById('nom-du-mois').innerHTML = `<span id="prev-mois" style="cursor:pointer; padding:10px;">‹</span>${nomMoisClair}<span id="next-mois" style="cursor:pointer; padding:10px;">›</span>`;
-            document.getElementById('prev-mois').onclick = () => { if(vueMois === 0) { vueMois = 11; vueAnnee--; } else { vueMois--; } afficherFinal(); };
-            document.getElementById('next-mois').onclick = () => { if(vueMois === 11) { vueMois = 0; vueAnnee++; } else { vueMois++; } afficherFinal(); };
-            dessinerGrille();
-            calculerStats();
-        }
-
-        function dessinerGrille() {
-            const grille = document.getElementById('grille-pixels');
-            grille.innerHTML = "";
-            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
-            const nbJours = new Date(vueAnnee, vueMois + 1, 0).getDate();
-            for(let i=1; i<=nbJours; i++) {
-                const p = document.createElement('div');
-                p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
-                p.innerText = i;
-                if(histo[i]) {
-                    p.onclick = () => {
-                        jourEnModification = i;
-                        document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
-                        document.getElementById('modal-date').innerText = i + " " + new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long'});
-                        document.getElementById('modal-raison').innerHTML = `<strong>${histo[i].raison}</strong>` + (histo[i].note ? `<br>"${histo[i].note}"` : "");
-                        document.getElementById('modal-detail').classList.remove('cache');
-                    };
-                }
-                grille.appendChild(p);
-            }
-        }
-
-        function calculerStats() {
-            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
-            const jours = Object.values(histo);
-            let streak = 0;
-            const jC = dateAujourdhui.getDate();
-            for(let i = jC; i > 0; i--) { if(histo[i]) streak++; else if (i !== jC) break; }
-            document.getElementById('streak-count').innerText = streak + " jours";
-
-            if(jours.length > 0) {
-                const contents = jours.filter(j => j.humeur === 'content').length;
-                const pourcentage = Math.round((contents / jours.length) * 100);
-                document.getElementById('score-bonheur').innerText = pourcentage + "%";
-                document.getElementById('bar-vert').style.width = pourcentage + "%";
-                document.getElementById('bar-rouge').style.width = (100 - pourcentage) + "%";
-                const causesMap = {};
-                jours.forEach(j => causesMap[j.raison] = (causesMap[j.raison] || 0) + 1);
-                const triees = Object.entries(causesMap).sort((a,b) => b[1] - a[1]);
-                document.getElementById('cause-majeure').innerText = triees[0][0];
-                document.getElementById('cause-sub').innerText = `Apparaît ${triees[0][1]} fois ce mois-ci`;
-            } else {
-                document.getElementById('score-bonheur').innerText = "--";
-                document.getElementById('cause-majeure').innerText = "Pas encore d'analyse";
-                document.getElementById('cause-sub').innerText = "Remplis quelques pixels !";
-            }
-        }
-
-        // MISSIONS
-        window.ajouterObjectif = function(type) {
-            const inputId = type === 'daily' ? 'input-daily-goal' : 'input-long-goal';
-            const text = document.getElementById(inputId).value;
-            const dateLong = document.getElementById('input-long-date')?.value;
-            if (!text.trim()) return;
-            mesObjectifs.push({ id: Date.now(), type, texte: text, echeance: type === 'long' ? dateLong : 'aujourd\'hui', statut: 'en-cours' });
-            localStorage.setItem('mesObjectifs', JSON.stringify(mesObjectifs));
-            document.getElementById(inputId).value = "";
-            afficherObjectifs();
-        };
-
-        window.changerStatut = function(id, nouveauStatut) {
-            mesObjectifs = mesObjectifs.map(obj => { if (obj.id === id) obj.statut = nouveauStatut; return obj; });
-            localStorage.setItem('mesObjectifs', JSON.stringify(mesObjectifs));
-            afficherObjectifs();
-            if(nouveauStatut === 'fait') confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, colors: ['#A8E6CF'] });
-        };
-
-        function afficherObjectifs() {
-            const contDaily = document.getElementById('liste-goals-du-jour');
-            const contLong = document.getElementById('liste-goals-long');
-            if(!contDaily || !contLong) return;
-            contDaily.innerHTML = ""; contLong.innerHTML = "";
-            mesObjectifs.forEach(obj => {
-                const html = `<div class="goal-item ${obj.statut === 'fait' ? 'goal-completed' : ''}"><div style="flex:1"><span class="goal-text">${obj.texte}</span><span class="goal-meta">${obj.type === 'long' ? '📅 ' + obj.echeance : '🔥 Aujourd\'hui'}</span></div><div class="goal-actions">${obj.statut === 'en-cours' ? `<button class="btn-status btn-done" onclick="changerStatut(${obj.id}, 'fait')">✅</button><button class="btn-status btn-fail" onclick="changerStatut(${obj.id}, 'echoue')">❌</button>` : `<span style="font-size: 11px; font-weight:bold; color:${obj.statut === 'fait' ? '#2e7d32' : '#c62828'}">${obj.statut === 'fait' ? 'REUSSI' : 'ECHEC'}</span>`}</div></div>`;
-                if (obj.type === 'daily') contDaily.insertAdjacentHTML('beforeend', html);
-                else contLong.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        // INIT
-        document.getElementById('btn-retour-choix').onclick = () => { document.getElementById('ecran-raisons').classList.add('cache'); document.getElementById('ecran-choix').classList.remove('cache'); };
-        document.getElementById('btn-tab-grille').onclick = () => { document.getElementById('grille-pixels').classList.remove('cache'); document.getElementById('section-stats').classList.add('cache'); };
-        document.getElementById('btn-tab-stats').onclick = () => { document.getElementById('grille-pixels').classList.add('cache'); document.getElementById('section-stats').classList.remove('cache'); };
-        document.getElementById('modal-close-btn').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); };
-        document.getElementById('btn-modifier-jour').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache')); document.getElementById('ecran-choix').classList.remove('cache'); };
-        document.getElementById('btn-ajouter-cause').onclick = () => { const val = document.getElementById('input-nouvelle-cause').value; if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; } };
-        document.getElementById('real-reset-btn').onclick = () => { if(confirm("Effacer ce mois ?")) { localStorage.removeItem(obtenirIdMois(vueMois, vueAnnee)); afficherFinal(); } };
-
-        const idInit = obtenirIdMois(dateAujourdhui.getMonth(), dateAujourdhui.getFullYear());
-        if(JSON.parse(localStorage.getItem(idInit))?.[dateAujourdhui.getDate()]) afficherFinal();
-        afficherObjectifs();
+        verifierSiRempli();
     });
+
+    // --- LOGIQUE ---
+    window.choisirHumeur = (h) => {
+        humeurActuelle = h;
+        document.getElementById('ecran-choix').classList.add('cache');
+        document.getElementById('ecran-raisons').classList.remove('cache');
+        const list = document.getElementById('liste-reisons'); // Oups, correction ID
+        const container = document.getElementById('liste-raisons');
+        container.innerHTML = "";
+        raisonsBase.forEach(r => {
+            const btn = document.createElement('button');
+            btn.className = "btn-raison";
+            btn.innerText = r;
+            btn.onclick = () => { raisonActuelle = r; document.getElementById('modal-note').classList.remove('cache'); };
+            container.appendChild(btn);
+        });
+    };
+
+    window.sauvegarderJournee = () => {
+        const d = new Date();
+        const id = `histo-${d.getFullYear()}-${d.getMonth()}`;
+        let histo = JSON.parse(localStorage.getItem(id)) || {};
+        
+        histo[d.getDate()] = { 
+            h: humeurActuelle, 
+            r: raisonActuelle, 
+            n: document.getElementById('note-texte').value 
+        };
+        
+        localStorage.setItem(id, JSON.stringify(histo));
+        document.getElementById('modal-note').classList.add('cache');
+        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+        verifierSiRempli();
+    };
+
+    function verifierSiRempli() {
+        const d = new Date();
+        const histo = JSON.parse(localStorage.getItem(`histo-${d.getFullYear()}-${d.getMonth()}`)) || {};
+        if (histo[d.getDate()]) {
+            document.getElementById('ecran-choix').classList.add('cache');
+            document.getElementById('ecran-raisons').classList.add('cache');
+            document.getElementById('ecran-bilan').classList.remove('cache');
+            majUI();
+        }
+    }
+
+    function majUI() {
+        const d = new Date();
+        const histo = JSON.parse(localStorage.getItem(`histo-${d.getFullYear()}-${d.getMonth()}`)) || {};
+        const grille = document.getElementById('vue-grille');
+        grille.innerHTML = "";
+        
+        const nbJours = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+        let contents = 0; let total = 0;
+
+        for (let i = 1; i <= nbJours; i++) {
+            const p = document.createElement('div');
+            p.className = "pixel";
+            p.innerText = i;
+            if (histo[i]) {
+                p.classList.add(histo[i].h === 'content' ? 'p-vert' : 'p-rouge');
+                total++; if(histo[i].h === 'content') contents++;
+            }
+            grille.appendChild(p);
+        }
+
+        // Stats
+        document.getElementById('stat-streak').innerText = total + " jour(s)";
+        if(total > 0) {
+            const perc = Math.round((contents / total) * 100);
+            document.getElementById('stat-bonheur').innerText = perc + "%";
+            document.getElementById('bar-v').style.width = perc + "%";
+            document.getElementById('bar-r').style.width = (100 - perc) + "%";
+        }
+    }
+
+    window.voirMois = () => {
+        document.getElementById('vue-grille').classList.remove('cache');
+        document.getElementById('vue-stats').classList.add('cache');
+    };
+
+    window.voirStats = () => {
+        document.getElementById('vue-grille').classList.add('cache');
+        document.getElementById('vue-stats').classList.remove('cache');
+    };
+
+    window.retourChoix = () => {
+        document.getElementById('ecran-raisons').classList.add('cache');
+        document.getElementById('ecran-choix').classList.remove('cache');
+    };
+
+    window.toggleDark = () => {
+        document.body.classList.toggle('dark-mode');
+    };
+
+    document.getElementById('reset-data').onclick = () => {
+        if(confirm("Effacer les données du mois ?")) {
+            const d = new Date();
+            localStorage.removeItem(`histo-${d.getFullYear()}-${d.getMonth()}`);
+            location.reload();
+        }
+    };
 </script>
 
 </body>
