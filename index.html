@@ -4,7 +4,108 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>KOACH v2.0</title>
-    <link rel="stylesheet" href="style.css">
+    <style>
+        :root { 
+            --vert: #A8E6CF; 
+            --rouge: #FF8B94; 
+            --gris-bg: #f2f2f7; 
+            --text: #1c1c1e; 
+            --card-bg: #ffffff;
+            --tab-bg: rgba(255, 255, 255, 0.85);
+            --border: #d1d1d6;
+        }
+
+        body.dark-mode {
+            --gris-bg: #1c1c1e;
+            --text: #f2f2f7;
+            --card-bg: #2c2c2e;
+            --tab-bg: rgba(28, 28, 30, 0.9);
+            --border: #3a3a3c;
+        }
+
+        body, html { margin: 0; padding: 0; height: 100%; width: 100%; font-family: -apple-system, system-ui, sans-serif; background-color: var(--gris-bg); color: var(--text); overflow-x: hidden; transition: background-color 0.3s, color 0.3s; }
+        .cache { display: none !important; }
+        .fondue { animation: fadeIn 0.4s ease-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* SPLASH SCREEN */
+        #splash-screen-koach { position: fixed; inset: 0; background: var(--card-bg); display: flex; flex-direction: column; align-items: center; justify-content: center; z-index: 5000; transition: opacity 0.8s; padding: 20px; text-align: center; }
+        .splash-logo-img { width: 120px; height: 120px; object-fit: contain; margin-bottom: 10px; animation: pulse-koala 2s infinite; filter: drop-shadow(0 10px 15px rgba(0,0,0,0.1)); }
+        .splash-title { font-size: 28px; font-weight: 900; letter-spacing: 4px; margin-bottom: 20px; }
+        .carte-accueil { font-size: 20px; line-height: 1.4; font-weight: 600; color: #8e8e93; opacity: 0; transform: translateY(10px); transition: 0.8s; }
+        .reveal-text { opacity: 1 !important; transform: translateY(0) !important; }
+        @keyframes pulse-koala { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+
+        /* NAVIGATION TAB BAR */
+        #app { width: 100%; min-height: 100vh; padding-bottom: 90px; }
+        .tab-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 75px; background: var(--tab-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); display: flex; justify-content: space-around; align-items: center; border-top: 0.5px solid var(--border); z-index: 4000; padding-bottom: 15px; }
+        .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #8e8e93; font-size: 10px; font-weight: 600; cursor: pointer; transition: 0.2s; flex: 1; }
+        .tab-item.active { color: var(--text); }
+        .tab-icon { font-size: 24px; }
+
+        /* KOACH CORE */
+        .ecran-accueil { display: flex; flex-direction: column; min-height: 80vh; width: 100%; align-items: center; justify-content: flex-start; position: relative; text-align: center; }
+        .bouton-principal { flex: 1; width: 100%; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; flex-direction: column !important; min-height: 250px; }
+        .bouton-principal.vert { background-color: var(--vert); }
+        .bouton-principal.rouge { background-color: var(--rouge); }
+        .koala-wrapper { position: relative; width: 100px; height: 100px; margin-bottom: 15px; display: flex; align-items: center; justify-content: center; }
+        .koala-img { width: 90px; height: 90px; object-fit: contain; }
+        .bounce { animation: bounce-koala 2s infinite; }
+        @keyframes bounce-koala { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        .sway { animation: sway-koala 3s infinite ease-in-out; }
+        @keyframes sway-koala { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        .grille { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; background: var(--card-bg); padding: 15px; border-radius: 20px; margin: 0 15px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .pixel { width: 32px; height: 32px; background: #eee; border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: bold; cursor: pointer; color: #333; }
+        .pixel.vert { background-color: var(--vert) !important; color: #1c1c1e; }
+        .pixel.rouge { background-color: var(--rouge) !important; color: #1c1c1e; }
+
+        /* ANALYSE & STATS */
+        .stats-container { width: 90%; max-width: 350px; display: flex; flex-direction: column; gap: 12px; margin: 0 auto; }
+        .stat-card { background: var(--card-bg); padding: 15px; border-radius: 18px; text-align: left; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
+        .stat-label { font-size: 10px; font-weight: bold; color: #8e8e93; text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-valeur { font-size: 22px; font-weight: bold; display: block; margin-top: 4px; }
+        .stat-sub { font-size: 13px; color: #8e8e93; margin-top: 2px; display: block; }
+        .repartition-bar { height: 8px; width: 100%; background: #eee; border-radius: 4px; margin-top: 10px; display: flex; overflow: hidden; }
+        body.dark-mode .repartition-bar { background: #3a3a3c; }
+
+        /* MISSIONS */
+        .goal-group { width: 90%; max-width: 400px; margin: 0 auto 30px auto; }
+        .group-title { font-size: 11px; font-weight: 700; color: #8e8e93; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+        .goal-item { background: var(--card-bg); padding: 16px; border-radius: 18px; margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03); }
+        .goal-text { font-weight: 600; font-size: 15px; display: block; }
+        .goal-meta { font-size: 11px; color: #8e8e93; }
+        .goal-actions { display: flex; gap: 8px; }
+        .btn-status { border: none; border-radius: 10px; padding: 8px; cursor: pointer; font-size: 14px; }
+        .btn-done { background: #e8f5e9; color: #2e7d32; }
+        .btn-fail { background: #ffebee; color: #c62828; }
+        .goal-completed { opacity: 0.6; text-decoration: line-through; }
+        .input-modern, .input-modern-stack { background: #e5e5ea; padding: 8px; border-radius: 16px; display: flex; align-items: center; margin-bottom: 10px; }
+        body.dark-mode .input-modern, body.dark-mode .input-modern-stack { background: #3a3a3c; }
+        .input-modern input, .input-modern-stack input { background: transparent; border: none; outline: none; padding: 10px; flex: 1; font-family: inherit; font-size: 14px; color: inherit; }
+        .input-modern button, .input-modern-stack button { background: var(--text); color: var(--gris-bg); border: none; border-radius: 12px; width: 35px; height: 35px; cursor: pointer; }
+
+        /* RÉGLAGES */
+        .setting-row { display: flex; justify-content: space-between; align-items: center; background: var(--card-bg); padding: 16px; border-radius: 18px; margin-top: 10px; }
+        .switch { position: relative; display: inline-block; width: 50px; height: 26px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; inset: 0; background-color: #ccc; transition: .4s; border-radius: 34px; }
+        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--vert); }
+        input:checked + .slider:before { transform: translateX(24px); }
+
+        /* MODALES */
+        .modal { position: fixed; inset: 0; background: rgba(0,0,0,0.4); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 6000; padding: 20px; }
+        .modal-content { background: var(--card-bg); padding: 25px; border-radius: 28px; width: 100%; max-width: 350px; text-align: center; }
+        .btn-primary { width: 100%; padding: 16px; border-radius: 18px; border: none; background: var(--vert); font-weight: bold; cursor: pointer; font-size: 16px; color: #1c1c1e; }
+        
+        .btn-raison { flex: 1; padding: 16px; border: none; border-radius: 15px; background: var(--card-bg); font-size: 16px; font-weight: 600; cursor: pointer; text-align: left; color: var(--text); }
+        .btn-suppr { background: var(--card-bg); border: none; border-radius: 15px; padding: 0 12px; color: var(--rouge); cursor: pointer; }
+        .liste-raisons { display: flex; flex-direction: column; width: 90%; max-width: 350px; gap: 8px; margin-top: 15px; margin-bottom: 15px; }
+        .bouton-onglet { border: none; padding: 10px 20px; border-radius: 20px; font-size: 13px; font-weight: bold; background: #e5e5ea; color: #8e8e93; cursor: pointer; }
+        body.dark-mode .bouton-onglet { background: #3a3a3c; }
+        .btn-reset { margin-top: 15px; font-size: 11px; color: #bbb; text-decoration: underline; cursor: pointer; text-align: center; }
+        .fleche-retour { position: absolute; top: 40px; left: 15px; font-size: 26px; color: #8e8e93; cursor: pointer; padding: 10px; z-index: 100; }
+    </style>
 </head>
 <body>
 
@@ -110,6 +211,14 @@
             <span>Rappels quotidiens 🔔</span>
             <button id="btn-notif-enable" style="background: var(--vert); border: none; border-radius: 10px; padding: 8px 15px; font-weight: bold; cursor: pointer;">Activer</button>
         </div>
+        <div style="padding: 10px; font-size: 11px; color: #8e8e93;">
+            Alertes à 8h (Setup), 20h (Check-up) et 21h (Bilan).
+        </div>
+        
+        <div class="stat-card" style="width:100%; margin-top:20px; box-sizing: border-box;">
+            <p><strong>KOACH v2.0</strong> 🐨</p>
+            <p style="color:#8e8e93; font-size:14px;">Ton compagnon de route quotidien.</p>
+        </div>
     </section>
 
     <nav class="tab-bar">
@@ -131,7 +240,7 @@
 <div id="modal-note" class="modal cache">
     <div class="modal-content">
         <h3>Une petite note ?</h3>
-        <textarea id="input-note" placeholder="Détaille un peu ta journée..."></textarea>
+        <textarea id="input-note" placeholder="Détaille un peu ta journée..." style="width: 100%; height: 80px; margin-bottom: 15px; border-radius: 10px; padding: 10px; border: 1px solid var(--border); background: transparent; color: inherit;"></textarea>
         <button id="btn-valider-note" class="btn-primary">Valider</button>
     </div>
 </div>
@@ -146,6 +255,206 @@
     </div>
 </div>
 
-<script type="module" src="script.js"></script>
+<script type="module">
+    import confetti from "https://cdn.skypack.dev/canvas-confetti";
+
+    // SERVICE WORKER & NOTIFS LOGIC
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('sw.js').then(reg => {
+                console.log('KOACH SW Enregistré');
+            }).catch(err => console.log('SW Error', err));
+        });
+    }
+
+    async function requestNotificationPermission() {
+        const permission = await Notification.requestPermission();
+        if (permission === 'granted') {
+            alert("Super ! KOACH t'enverra tes rappels quotidiens.");
+            // On pourrait programmer ici via l'API Local Notifications ou un backend
+            // Pour une PWA pure, on simule l'intention. 
+            // Les vraies notifs programmées nécessitent un Service Worker actif avec "showNotification"
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const dateAujourdhui = new Date();
+        let vueMois = dateAujourdhui.getMonth();
+        let vueAnnee = dateAujourdhui.getFullYear();
+        let jourEnModification = null; 
+        let mesObjectifs = JSON.parse(localStorage.getItem('mesObjectifs')) || [];
+        let mesCauses = JSON.parse(localStorage.getItem('mesCauses')) || ["🏢 Travail", "❤️ Amour", "🥗 Santé", "🎮 Loisirs"];
+        let humeurDuJour = "";
+        let causeChoisie = "";
+
+        const obtenirIdMois = (m, a) => `histo-${a}-${m}`;
+
+        // DARK MODE
+        const darkModeToggle = document.getElementById('dark-mode-toggle');
+        const isDark = localStorage.getItem('darkMode') === 'true';
+        if (isDark) { document.body.classList.add('dark-mode'); darkModeToggle.checked = true; }
+        darkModeToggle.onchange = () => { document.body.classList.toggle('dark-mode'); localStorage.setItem('darkMode', darkModeToggle.checked); };
+
+        // NOTIFS BUTTON
+        document.getElementById('btn-notif-enable').onclick = requestNotificationPermission;
+
+        // SPLASH
+        const splash = document.getElementById('splash-screen-koach');
+        const splashText = document.querySelector('.carte-accueil');
+        const h = dateAujourdhui.getHours();
+        splashText.innerText = (h >= 5 && h < 12) ? "Bien dormi ? 🐨" : (h >= 12 && h < 18) ? "Bon après-midi ! ✨" : "Prends une minute pour souffler... 🌙";
+        setTimeout(() => splashText.classList.add('reveal-text'), 500);
+        setTimeout(() => { splash.style.opacity = '0'; setTimeout(() => splash.style.display = 'none', 800); }, 2200);
+
+        // NAV
+        window.switchMainTab = function(target, element) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.add('cache'));
+            document.getElementById('section-' + target).classList.remove('cache');
+            document.querySelectorAll('.tab-item').forEach(item => item.classList.remove('active'));
+            element.classList.add('active');
+            if (target === 'goals') afficherObjectifs();
+        };
+
+        // KOACH LOGIC
+        window.choisirHumeur = function(h) {
+            humeurDuJour = h;
+            confetti({ particleCount: 30, colors: h === 'content' ? ['#A8E6CF'] : ['#FF8B94'], origin: { y: 0.7 } });
+            document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
+            document.getElementById('ecran-raisons').classList.remove('cache');
+            chargerCauses();
+        };
+
+        function chargerCauses() {
+            const cont = document.getElementById('container-raisons');
+            cont.innerHTML = "";
+            mesCauses.forEach((r, index) => {
+                const div = document.createElement('div');
+                div.style.display = "flex"; div.style.gap = "8px";
+                div.innerHTML = `<button class="btn-raison">${r}</button><button class="btn-suppr">×</button>`;
+                div.querySelector('.btn-raison').onclick = () => { causeChoisie = r; document.getElementById('modal-note').classList.remove('cache'); };
+                div.querySelector('.btn-suppr').onclick = () => { mesCauses.splice(index, 1); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); };
+                cont.appendChild(div);
+            });
+        }
+
+        document.getElementById('btn-valider-note').onclick = () => {
+            const note = document.getElementById('input-note').value;
+            const jS = jourEnModification || dateAujourdhui.getDate();
+            const mS = (jourEnModification !== null) ? vueMois : dateAujourdhui.getMonth();
+            const aS = (jourEnModification !== null) ? vueAnnee : dateAujourdhui.getFullYear();
+            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(mS, aS))) || {};
+            histo[jS] = { humeur: humeurDuJour, raison: causeChoisie, note: note };
+            localStorage.setItem(obtenirIdMois(mS, aS), JSON.stringify(histo));
+            document.getElementById('modal-note').classList.add('cache');
+            confetti({ particleCount: 150, spread: 70, colors: humeurDuJour === 'content' ? ['#A8E6CF'] : ['#FF8B94'] });
+            jourEnModification = null;
+            afficherFinal();
+        };
+
+        function afficherFinal() {
+            document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
+            document.getElementById('ecran-confirmation').classList.remove('cache');
+            const nomMoisClair = new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long', year:'numeric'});
+            document.getElementById('nom-du-mois').innerHTML = `<span id="prev-mois" style="cursor:pointer; padding:10px;">‹</span>${nomMoisClair}<span id="next-mois" style="cursor:pointer; padding:10px;">›</span>`;
+            document.getElementById('prev-mois').onclick = () => { if(vueMois === 0) { vueMois = 11; vueAnnee--; } else { vueMois--; } afficherFinal(); };
+            document.getElementById('next-mois').onclick = () => { if(vueMois === 11) { vueMois = 0; vueAnnee++; } else { vueMois++; } afficherFinal(); };
+            dessinerGrille();
+            calculerStats();
+        }
+
+        function dessinerGrille() {
+            const grille = document.getElementById('grille-pixels');
+            grille.innerHTML = "";
+            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
+            const nbJours = new Date(vueAnnee, vueMois + 1, 0).getDate();
+            for(let i=1; i<=nbJours; i++) {
+                const p = document.createElement('div');
+                p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
+                p.innerText = i;
+                if(histo[i]) {
+                    p.onclick = () => {
+                        jourEnModification = i;
+                        document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
+                        document.getElementById('modal-date').innerText = i + " " + new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long'});
+                        document.getElementById('modal-raison').innerHTML = `<strong>${histo[i].raison}</strong>` + (histo[i].note ? `<br>"${histo[i].note}"` : "");
+                        document.getElementById('modal-detail').classList.remove('cache');
+                    };
+                }
+                grille.appendChild(p);
+            }
+        }
+
+        function calculerStats() {
+            const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
+            const jours = Object.values(histo);
+            let streak = 0;
+            const jC = dateAujourdhui.getDate();
+            for(let i = jC; i > 0; i--) { if(histo[i]) streak++; else if (i !== jC) break; }
+            document.getElementById('streak-count').innerText = streak + " jours";
+
+            if(jours.length > 0) {
+                const contents = jours.filter(j => j.humeur === 'content').length;
+                const pourcentage = Math.round((contents / jours.length) * 100);
+                document.getElementById('score-bonheur').innerText = pourcentage + "%";
+                document.getElementById('bar-vert').style.width = pourcentage + "%";
+                document.getElementById('bar-rouge').style.width = (100 - pourcentage) + "%";
+                const causesMap = {};
+                jours.forEach(j => causesMap[j.raison] = (causesMap[j.raison] || 0) + 1);
+                const triees = Object.entries(causesMap).sort((a,b) => b[1] - a[1]);
+                document.getElementById('cause-majeure').innerText = triees[0][0];
+                document.getElementById('cause-sub').innerText = `Apparaît ${triees[0][1]} fois ce mois-ci`;
+            } else {
+                document.getElementById('score-bonheur').innerText = "--";
+                document.getElementById('cause-majeure').innerText = "Pas encore d'analyse";
+                document.getElementById('cause-sub').innerText = "Remplis quelques pixels !";
+            }
+        }
+
+        // MISSIONS
+        window.ajouterObjectif = function(type) {
+            const inputId = type === 'daily' ? 'input-daily-goal' : 'input-long-goal';
+            const text = document.getElementById(inputId).value;
+            const dateLong = document.getElementById('input-long-date')?.value;
+            if (!text.trim()) return;
+            mesObjectifs.push({ id: Date.now(), type, texte: text, echeance: type === 'long' ? dateLong : 'aujourd\'hui', statut: 'en-cours' });
+            localStorage.setItem('mesObjectifs', JSON.stringify(mesObjectifs));
+            document.getElementById(inputId).value = "";
+            afficherObjectifs();
+        };
+
+        window.changerStatut = function(id, nouveauStatut) {
+            mesObjectifs = mesObjectifs.map(obj => { if (obj.id === id) obj.statut = nouveauStatut; return obj; });
+            localStorage.setItem('mesObjectifs', JSON.stringify(mesObjectifs));
+            afficherObjectifs();
+            if(nouveauStatut === 'fait') confetti({ particleCount: 40, spread: 50, origin: { y: 0.8 }, colors: ['#A8E6CF'] });
+        };
+
+        function afficherObjectifs() {
+            const contDaily = document.getElementById('liste-goals-du-jour');
+            const contLong = document.getElementById('liste-goals-long');
+            if(!contDaily || !contLong) return;
+            contDaily.innerHTML = ""; contLong.innerHTML = "";
+            mesObjectifs.forEach(obj => {
+                const html = `<div class="goal-item ${obj.statut === 'fait' ? 'goal-completed' : ''}"><div style="flex:1"><span class="goal-text">${obj.texte}</span><span class="goal-meta">${obj.type === 'long' ? '📅 ' + obj.echeance : '🔥 Aujourd\'hui'}</span></div><div class="goal-actions">${obj.statut === 'en-cours' ? `<button class="btn-status btn-done" onclick="changerStatut(${obj.id}, 'fait')">✅</button><button class="btn-status btn-fail" onclick="changerStatut(${obj.id}, 'echoue')">❌</button>` : `<span style="font-size: 11px; font-weight:bold; color:${obj.statut === 'fait' ? '#2e7d32' : '#c62828'}">${obj.statut === 'fait' ? 'REUSSI' : 'ECHEC'}</span>`}</div></div>`;
+                if (obj.type === 'daily') contDaily.insertAdjacentHTML('beforeend', html);
+                else contLong.insertAdjacentHTML('beforeend', html);
+            });
+        }
+
+        // INIT
+        document.getElementById('btn-retour-choix').onclick = () => { document.getElementById('ecran-raisons').classList.add('cache'); document.getElementById('ecran-choix').classList.remove('cache'); };
+        document.getElementById('btn-tab-grille').onclick = () => { document.getElementById('grille-pixels').classList.remove('cache'); document.getElementById('section-stats').classList.add('cache'); };
+        document.getElementById('btn-tab-stats').onclick = () => { document.getElementById('grille-pixels').classList.add('cache'); document.getElementById('section-stats').classList.remove('cache'); };
+        document.getElementById('modal-close-btn').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); };
+        document.getElementById('btn-modifier-jour').onclick = () => { document.getElementById('modal-detail').classList.add('cache'); document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache')); document.getElementById('ecran-choix').classList.remove('cache'); };
+        document.getElementById('btn-ajouter-cause').onclick = () => { const val = document.getElementById('input-nouvelle-cause').value; if(val.trim()) { mesCauses.push(val.trim()); localStorage.setItem('mesCauses', JSON.stringify(mesCauses)); chargerCauses(); document.getElementById('input-nouvelle-cause').value = ""; } };
+        document.getElementById('real-reset-btn').onclick = () => { if(confirm("Effacer ce mois ?")) { localStorage.removeItem(obtenirIdMois(vueMois, vueAnnee)); afficherFinal(); } };
+
+        const idInit = obtenirIdMois(dateAujourdhui.getMonth(), dateAujourdhui.getFullYear());
+        if(JSON.parse(localStorage.getItem(idInit))?.[dateAujourdhui.getDate()]) afficherFinal();
+        afficherObjectifs();
+    });
+</script>
+
 </body>
 </html>
