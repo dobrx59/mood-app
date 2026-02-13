@@ -362,24 +362,31 @@
             calculerStats();
         }
 
-        function dessinerGrille() {
+       function dessinerGrille() {
             const grille = document.getElementById('grille-pixels');
             grille.innerHTML = "";
             const histo = JSON.parse(localStorage.getItem(obtenirIdMois(vueMois, vueAnnee))) || {};
             const nbJours = new Date(vueAnnee, vueMois + 1, 0).getDate();
+
             for(let i=1; i<=nbJours; i++) {
                 const p = document.createElement('div');
                 p.className = "pixel " + (histo[i] ? (histo[i].humeur === 'content' ? 'vert' : 'rouge') : '');
                 p.innerText = i;
-                if(histo[i]) {
-                    p.onclick = () => {
-                        jourEnModification = i;
+
+                p.onclick = () => {
+                    jourEnModification = i; // On stocke le jour cliqué
+                    if(histo[i]) {
+                        // Si le jour est déjà rempli, on ouvre la modale de détail (ton code actuel)
                         document.getElementById('modal-emoji').innerText = histo[i].humeur === 'content' ? '😊' : '😕';
                         document.getElementById('modal-date').innerText = i + " " + new Date(vueAnnee, vueMois).toLocaleDateString('fr-FR', {month:'long'});
                         document.getElementById('modal-raison').innerHTML = `<strong>${histo[i].raison}</strong>` + (histo[i].note ? `<br>"${histo[i].note}"` : "");
                         document.getElementById('modal-detail').classList.remove('cache');
-                    };
-                }
+                    } else {
+                        // SI LE JOUR EST VIDE : On bascule directement sur l'écran de choix d'humeur
+                        document.querySelectorAll('.ecran-accueil').forEach(e => e.classList.add('cache'));
+                        document.getElementById('ecran-choix').classList.remove('cache');
+                    }
+                };
                 grille.appendChild(p);
             }
         }
